@@ -40,6 +40,9 @@ dependencies {
     // RecyclerView
     implementation "androidx.recyclerview:recyclerview:${libraries.recyclerView}"
 
+    // ConstraintLayout
+    implementation "androidx.constraintlayout:constraintlayout:${libraries.constraintLayout}"
+
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:${libraries.retrofit}"
     implementation "com.squareup.retrofit2:converter-moshi:${libraries.moshi}"
@@ -54,5 +57,6 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:${libraries.dagger}"
 
     // Coroutines
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${libraries.viewModelKTX}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${libraries.coroutines}"
 }

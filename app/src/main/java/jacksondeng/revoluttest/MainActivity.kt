@@ -1,10 +1,15 @@
 package jacksondeng.revoluttest
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
+import jacksondeng.revoluttest.data.api.RatesApi
+import jacksondeng.revoluttest.data.api.RatesApiImpl
+import jacksondeng.revoluttest.viewmodel.RatesViewModel
 
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -15,10 +20,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        val viewModel = RatesViewModel(RatesApiImpl())
+
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            viewModel.getRates("EUR")
         }
+
+        viewModel.rates.observe(this, Observer {
+            Log.d("SUCCESSSS", "$it")
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
