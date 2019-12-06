@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 def configuration = rootProject.ext.configuration
 def libraries = rootProject.ext.libraries
 
@@ -40,8 +42,13 @@ dependencies {
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:${libraries.retrofit}"
-    implementation "com.squareup.retrofit2:converter-gson:${libraries.gsonConverter}"
+    implementation "com.squareup.retrofit2:converter-moshi:${libraries.moshi}"
 
-    // Moshi
-    implementation "com.squareup.moshi:moshi:${libraries.moshi}"
+    // OkHttp
+    implementation "com.squareup.okhttp3:okhttp:${libraries.okHttp}"
+    implementation "com.squareup.okhttp3:logging-interceptor:${libraries.okHttpLog}"
+
+    // Dagger
+    implementation "com.google.dagger:dagger:${libraries.dagger}"
+    kapt "com.google.dagger:dagger-compiler:${libraries.dagger}"
 }
