@@ -1,26 +1,28 @@
-package jacksondeng.revoluttest
+package jacksondeng.revoluttest.view
 
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import jacksondeng.revoluttest.data.api.RatesApiImpl
+import dagger.android.support.DaggerAppCompatActivity
+import jacksondeng.revoluttest.R
+import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.cache.CachedRates
 import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : DaggerAppCompatActivity() {
+
+    @Inject
+    lateinit var viewModel: RatesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
-        val repo = RatesRepositoryImpl(RatesApiImpl(), CachedRates())
-        val viewModel = RatesViewModel(repo)
 
         fab.setOnClickListener { view ->
             viewModel.getRates("EUR")

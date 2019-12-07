@@ -54,7 +54,11 @@ dependencies {
 
     // Dagger
     implementation "com.google.dagger:dagger:${libraries.dagger}"
+    implementation "com.google.dagger:dagger-android-support:${libraries.dagger}"
+    annotationProcessor "com.google.dagger:dagger-compiler:${libraries.dagger}"
+    annotationProcessor "com.google.dagger:dagger-android-processor:${libraries.dagger}"
     kapt "com.google.dagger:dagger-compiler:${libraries.dagger}"
+    kapt "com.google.dagger:dagger-android-processor:${libraries.dagger}"
 
     // Coroutines
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${libraries.viewModelKTX}"
