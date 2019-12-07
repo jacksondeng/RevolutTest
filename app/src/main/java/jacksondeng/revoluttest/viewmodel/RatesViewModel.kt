@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.State
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RatesViewModel(private val repo: RatesRepository) : ViewModel() {
 
@@ -17,12 +19,14 @@ class RatesViewModel(private val repo: RatesRepository) : ViewModel() {
     val state: LiveData<State> = _state
 
     fun getRates(base: String = "EUR") {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             rates = repo.getRates(base)
-            rates?.let {
-                _state.value = State.RefreshList(it)
-            } ?: run {
-                _state.value = State.ShowEmptyScreen("Please try again later")
+            withContext(Dispatchers.Main) {
+                rates?.let {
+                    _state.value = State.RefreshList(it)
+                } ?: run {
+                    _state.value = State.ShowEmptyScreen("Please try again later")
+                }
             }
         }
     }

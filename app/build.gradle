@@ -25,6 +25,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    testOptions {
+        // To prevent (RuntimeException: Method getMainLooper in android.os.Looper not mocked) during unit test
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -36,6 +41,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation("com.squareup.okhttp3:mockwebserver:4.2.1")
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2'
+    testImplementation "android.arch.core:core-testing:1.1.1"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2"
+    testImplementation "io.mockk:mockk:1.9.3"
 
     androidTestImplementation 'androidx.test:runner:1.3.0-alpha03'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0-alpha03'
@@ -66,4 +75,5 @@ dependencies {
     // Coroutines
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${libraries.viewModelKTX}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${libraries.coroutines}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libraries.coroutines}"
 }

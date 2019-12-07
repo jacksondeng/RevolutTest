@@ -14,7 +14,7 @@ class RatesRepositoryImpl(private val api: RatesApi, private val cachedRates: Ca
     RatesRepository {
     override suspend fun getRates(base: String): Rates? {
         return try {
-            val dto = api.getRates(base).await()
+            val dto = api.getRates(base)
             mapToModel(dto)
         } catch (exception: Exception) {
             cachedRates.getCachedRates(base)
