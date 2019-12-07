@@ -10,6 +10,7 @@ import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_main.*
 import javax.inject.Inject
 
 class MainActivity : DaggerAppCompatActivity() {
@@ -17,10 +18,15 @@ class MainActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var viewModel: RatesViewModel
 
+    lateinit var ratesAdapter: RatesAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        ratesAdapter = RatesAdapter()
+        ratesRv.adapter = ratesAdapter
 
         fab.setOnClickListener { view ->
             viewModel.getRates("EUR")
@@ -29,7 +35,7 @@ class MainActivity : DaggerAppCompatActivity() {
         viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {
-                    Log.d("SUCCESSSS", "${state.rates}")
+                    ratesAdapter.submitList(state.rates.rates)
                 }
 
                 is State.ShowEmptyScreen -> {

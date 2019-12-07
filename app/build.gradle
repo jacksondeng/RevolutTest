@@ -30,6 +30,10 @@ android {
         // To prevent (RuntimeException: Method getMainLooper in android.os.Looper not mocked) during unit test
         unitTests.returnDefaultValues = true
     }
+
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
