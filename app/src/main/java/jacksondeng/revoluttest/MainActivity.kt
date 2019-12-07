@@ -6,11 +6,10 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.google.android.material.snackbar.Snackbar
-import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.api.RatesApiImpl
+import jacksondeng.revoluttest.data.cache.CachedRates
+import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
-
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -20,7 +19,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val viewModel = RatesViewModel(RatesApiImpl())
+        val repo = RatesRepositoryImpl(RatesApiImpl(), CachedRates())
+        val viewModel = RatesViewModel(repo)
 
         fab.setOnClickListener { view ->
             viewModel.getRates("EUR")
