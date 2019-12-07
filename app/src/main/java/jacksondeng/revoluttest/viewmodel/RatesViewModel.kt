@@ -6,21 +6,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.model.entity.Rates
+import jacksondeng.revoluttest.util.State
 import kotlinx.coroutines.launch
 
 class RatesViewModel(private val repo: RatesRepository) : ViewModel() {
 
-    private var _rates = MutableLiveData<Rates>()
-    val rates: LiveData<Rates> = _rates
+    private var rates: Rates? = null
+
+    private var _state = MutableLiveData<State>()
+    val state: LiveData<State> = _state
 
     fun getRates(base: String = "EUR") {
         viewModelScope.launch {
-            val rates = repo.getRates(base)
+            rates = repo.getRates(base)
             rates?.let {
-                _rates.value = it
+                _state.value = State.RefreshList(it)
             } ?: run {
-                // API failed and cache is empty
-                // TODO : Show empty layout or error message
+                _state.value = State.ShowEmptyScreen("Please try again later")
             }
         }
     }

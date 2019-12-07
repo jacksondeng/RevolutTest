@@ -7,9 +7,7 @@ import android.view.MenuItem
 import androidx.lifecycle.Observer
 import dagger.android.support.DaggerAppCompatActivity
 import jacksondeng.revoluttest.R
-import jacksondeng.revoluttest.data.api.RatesApi
-import jacksondeng.revoluttest.data.cache.CachedRates
-import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
+import jacksondeng.revoluttest.util.State
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -28,8 +26,16 @@ class MainActivity : DaggerAppCompatActivity() {
             viewModel.getRates("EUR")
         }
 
-        viewModel.rates.observe(this, Observer {
-            Log.d("SUCCESSSS", "$it")
+        viewModel.state.observe(this, Observer { state ->
+            when (state) {
+                is State.RefreshList -> {
+                    Log.d("SUCCESSSS", "${state.rates}")
+                }
+
+                is State.ShowEmptyScreen -> {
+                    // TODO: Show empty layout
+                }
+            }
         })
     }
 
