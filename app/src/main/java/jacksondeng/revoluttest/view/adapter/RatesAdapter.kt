@@ -17,6 +17,10 @@ const val VIEW_TYPE_QUERY_RATE = 0
 const val VIEW_TYPE_EXCHANGE_RATE = 1
 
 class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
             VIEW_TYPE_QUERY_RATE -> {
@@ -39,6 +43,10 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 throw IllegalArgumentException("Invalid view type: $viewType")
             }
         }
+    }
+
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
     }
 
     override fun getItemViewType(position: Int): Int {

@@ -45,4 +45,6 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
     fun pollRates(base: String = "EUR") = repo.pollRates(base)
 
     fun stopPolling() = repo.stopPolling()
+
+    fun pausePolling() = repo.pausePolling()
 }

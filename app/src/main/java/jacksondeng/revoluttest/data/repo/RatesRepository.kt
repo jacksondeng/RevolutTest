@@ -11,6 +11,7 @@ import jacksondeng.revoluttest.data.cache.CachedRates
 import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
+import jacksondeng.revoluttest.util.BASE_THUMBNAIL_URL
 import jacksondeng.revoluttest.util.Result
 import java.util.*
 import java.util.concurrent.Executors
@@ -23,6 +24,7 @@ interface RatesRepository {
     fun getRatesToObserve(): LiveData<Result<Rates>>
     fun pollRates(base: String)
     fun stopPolling()
+    fun pausePolling()
 }
 
 class RatesRepositoryImpl @Inject constructor(
@@ -47,9 +49,6 @@ class RatesRepositoryImpl @Inject constructor(
                 }
                 .subscribeOn(scheduler)
                 .distinctUntilChanged()
-                .doOnError {
-                    _rates.value = Result.Failure(it)
-                }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { rates ->
                     rates?.let {
@@ -73,6 +72,10 @@ class RatesRepositoryImpl @Inject constructor(
         return Rates(dto.base, generateCurrencies(dto.rates))
     }
 
+    private fun getImageUrl(countryCode: String): String {
+        return "$BASE_THUMBNAIL_URL${countryCode.toLowerCase(Locale.US)}.png"
+    }
+
     fun generateCurrencies(rates: Map<String, Double>): List<CurrencyModel> {
         return mutableListOf<CurrencyModel>().apply {
             rates.map {
@@ -80,7 +83,8 @@ class RatesRepositoryImpl @Inject constructor(
                     this.add(
                         CurrencyModel(
                             currency = Currency.getInstance(it.key),
-                            rate = it.value
+                            rate = it.value,
+                            imageUrl = getImageUrl(it.key)
                         )
                     )
                 } catch (exception: IllegalArgumentException) {
@@ -91,6 +95,8 @@ class RatesRepositoryImpl @Inject constructor(
     }
 
     override fun stopPolling() = compositeDisposable.dispose()
+
+    override fun pausePolling() = compositeDisposable.clear()
 
     override fun getRatesToObserve() = rates
 }

@@ -36,6 +36,11 @@ class MainActivity : DaggerAppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        viewModel.pausePolling()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         viewModel.stopPolling()
     }
 

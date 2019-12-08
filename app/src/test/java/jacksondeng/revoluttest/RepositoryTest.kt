@@ -41,8 +41,8 @@ class RepositoryTest {
     private val validCache = Rates(
         base = "EUR",
         rates = listOf(
-            CurrencyModel(Currency.getInstance("USD"), 2104935.0),
-            CurrencyModel(Currency.getInstance("SGD"), 1208402.11)
+            CurrencyModel(Currency.getInstance("USD"), 2104935.0, ""),
+            CurrencyModel(Currency.getInstance("SGD"), 1208402.11, "")
         )
     )
 
@@ -109,10 +109,10 @@ class RepositoryTest {
         )
 
         val resultList = listOf(
-            CurrencyModel(Currency.getInstance("EUR"), 123.123),
-            CurrencyModel(Currency.getInstance("USD"), 123.004),
-            CurrencyModel(Currency.getInstance("SGD"), 0.0123),
-            CurrencyModel(Currency.getInstance("TWD"), 100.0)
+            CurrencyModel(Currency.getInstance("EUR"), 123.123, ""),
+            CurrencyModel(Currency.getInstance("USD"), 123.004, ""),
+            CurrencyModel(Currency.getInstance("SGD"), 0.0123, ""),
+            CurrencyModel(Currency.getInstance("TWD"), 100.0, "")
         )
 
         val result = repo.generateCurrencies(dummyData)
