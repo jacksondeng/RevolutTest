@@ -11,6 +11,8 @@ import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
 import javax.inject.Inject
+import jacksondeng.revoluttest.view.adapter.RatesAdapter
+
 
 class MainActivity : DaggerAppCompatActivity() {
 
@@ -29,6 +31,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
         fab.setOnClickListener {
             viewModel.getRates("EUR")
+            viewModel.pollRates("EUR")
         }
 
         viewModel.state.observe(this, Observer { state ->
@@ -54,8 +57,6 @@ class MainActivity : DaggerAppCompatActivity() {
                 }
             }
         })
-
-        val test = viewModel.pollRates("EUR")
     }
 
     override fun onPause() {

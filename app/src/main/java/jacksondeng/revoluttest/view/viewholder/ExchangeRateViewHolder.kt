@@ -1,10 +1,10 @@
-package jacksondeng.revoluttest.view
+package jacksondeng.revoluttest.view.viewholder
 
 import androidx.recyclerview.widget.RecyclerView
-import jacksondeng.revoluttest.databinding.ItemCurrencyBinding
+import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
 import jacksondeng.revoluttest.model.entity.Currency
 
-class CurrencyViewHolder(private val binding: ItemCurrencyBinding) :
+class ExchangeRateViewHolder(private val binding: ItemExchangeRateBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
     fun bind(currency: Currency) {
