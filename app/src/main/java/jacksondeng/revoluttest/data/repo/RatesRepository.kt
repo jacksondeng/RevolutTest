@@ -12,6 +12,7 @@ import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.Currency
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.Result
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -35,12 +36,16 @@ class RatesRepositoryImpl @Inject constructor(
     private var compositeDisposable = CompositeDisposable()
 
     override fun pollRates(base: String) {
+        // Prevent overlapping requests
+        val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         compositeDisposable.add(
             Observable.interval(2, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
                 .flatMap {
                     api.pollRates(base)
+                        .retry(3)
                 }
+                .subscribeOn(scheduler)
+                .distinctUntilChanged()
                 .doOnError {
                     _rates.value = Result.Failure(it)
                 }
