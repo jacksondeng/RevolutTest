@@ -1,17 +1,18 @@
 package jacksondeng.revoluttest.view
 
+import android.content.Context
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.android.support.DaggerAppCompatActivity
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
+import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
 import javax.inject.Inject
-import jacksondeng.revoluttest.view.adapter.RatesAdapter
 
 class MainActivity : DaggerAppCompatActivity() {
 
@@ -24,27 +25,37 @@ class MainActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        initViews()
+        initVm()
+    }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.pollRates("EUR")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopPolling()
+    }
+
+    private fun initViews() {
+        initAdapters()
+        initRv(this@MainActivity)
+    }
+
+    private fun initAdapters() {
         ratesAdapter = RatesAdapter()
-        ratesRv.adapter = ratesAdapter
+    }
 
-        fab.setOnClickListener {
-            viewModel.getRates("EUR")
-            viewModel.pollRates("EUR")
+    private fun initRv(context: Context) {
+        ratesRv.apply {
+            adapter = ratesAdapter
+            addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         }
+    }
 
-        /*viewModel.state.observe(this, Observer { state ->
-            when (state) {
-                is State.RefreshList -> {
-                    ratesAdapter.submitList(state.rates.rates)
-                }
-
-                is State.ShowEmptyScreen -> {
-                    // TODO: Show empty layout
-                }
-            }
-        })*/
-
+    private fun initVm() {
         viewModel.viewState.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {
@@ -56,26 +67,5 @@ class MainActivity : DaggerAppCompatActivity() {
                 }
             }
         })
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.stopPolling()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 }
