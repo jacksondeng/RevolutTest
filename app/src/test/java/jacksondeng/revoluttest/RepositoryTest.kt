@@ -8,7 +8,7 @@ import jacksondeng.revoluttest.data.cache.CachedRates
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
 import jacksondeng.revoluttest.model.dto.RatesDTO
-import jacksondeng.revoluttest.model.entity.Currency
+import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,6 +22,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.MockitoAnnotations
+import java.util.*
 
 
 @ExperimentalCoroutinesApi
@@ -40,8 +41,8 @@ class RepositoryTest {
     private val validCache = Rates(
         base = "EUR",
         rates = listOf(
-            Currency("AUD_CACHED",2104935.0),
-            Currency("SGD_CACHED",1208402.11)
+            CurrencyModel(Currency.getInstance("USD"), 2104935.0),
+            CurrencyModel(Currency.getInstance("SGD"), 1208402.11)
         )
     )
 
@@ -49,7 +50,7 @@ class RepositoryTest {
 
     private val testScope = TestCoroutineScope(testDispatcher)
 
-    lateinit var repo: RatesRepository
+    lateinit var repo: RatesRepositoryImpl
 
     @Before
     internal fun setUp() {
@@ -95,5 +96,28 @@ class RepositoryTest {
             println("$result")
             Assert.assertNull(result)
         }
+    }
+
+    @Test
+    internal fun `generate currencies list test`() {
+        val dummyData = mapOf(
+            Pair("EUR", 123.123),
+            Pair("USD", 123.004),
+            Pair("SGD", 0.0123),
+            Pair("ABC", -120.1),
+            Pair("TWD", 100.0)
+        )
+
+        val resultList = listOf(
+            CurrencyModel(Currency.getInstance("EUR"), 123.123),
+            CurrencyModel(Currency.getInstance("USD"), 123.004),
+            CurrencyModel(Currency.getInstance("SGD"), 0.0123),
+            CurrencyModel(Currency.getInstance("TWD"), 100.0)
+        )
+
+        val result = repo.generateCurrencies(dummyData)
+        println("$result")
+        Assert.assertNotNull(result)
+        Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))
     }
 }

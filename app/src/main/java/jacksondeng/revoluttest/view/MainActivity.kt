@@ -13,7 +13,6 @@ import kotlinx.android.synthetic.main.fragment_main.*
 import javax.inject.Inject
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
 
-
 class MainActivity : DaggerAppCompatActivity() {
 
     @Inject
@@ -34,7 +33,7 @@ class MainActivity : DaggerAppCompatActivity() {
             viewModel.pollRates("EUR")
         }
 
-        viewModel.state.observe(this, Observer { state ->
+        /*viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {
                     ratesAdapter.submitList(state.rates.rates)
@@ -44,7 +43,7 @@ class MainActivity : DaggerAppCompatActivity() {
                     // TODO: Show empty layout
                 }
             }
-        })
+        })*/
 
         viewModel.viewState.observe(this, Observer { state ->
             when (state) {

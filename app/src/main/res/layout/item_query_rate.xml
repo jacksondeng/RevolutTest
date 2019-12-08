@@ -7,13 +7,28 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-        <TextView
-                android:id="@+id/queryCountry"
+        <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:textSize="16sp"
-                tools:text="SGD" />
+                android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/queryCountry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    tools:text="SGD" />
+
+            <TextView
+                    android:id="@+id/countryDisplayName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    tools:text="SGD"/>
+
+        </LinearLayout>
 
         <View
                 android:layout_width="0dp"

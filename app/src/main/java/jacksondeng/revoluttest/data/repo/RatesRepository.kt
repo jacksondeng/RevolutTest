@@ -9,9 +9,10 @@ import io.reactivex.schedulers.Schedulers
 import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.cache.CachedRates
 import jacksondeng.revoluttest.model.dto.RatesDTO
-import jacksondeng.revoluttest.model.entity.Currency
+import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.Result
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -69,9 +70,24 @@ class RatesRepositoryImpl @Inject constructor(
     }
 
     private fun mapToModel(dto: RatesDTO): Rates {
-        return Rates(dto.base, dto.rates.map {
-            Currency(name = it.key, rate = it.value)
-        })
+        return Rates(dto.base, generateCurrencies(dto.rates))
+    }
+
+    fun generateCurrencies(rates: Map<String, Double>): List<CurrencyModel> {
+        return mutableListOf<CurrencyModel>().apply {
+            rates.map {
+                try {
+                    this.add(
+                        CurrencyModel(
+                            currency = Currency.getInstance(it.key),
+                            rate = it.value
+                        )
+                    )
+                } catch (exception: IllegalArgumentException) {
+                    // Handle unknown country code
+                }
+            }
+        }
     }
 
     override fun stopPolling() = compositeDisposable.dispose()

@@ -5,8 +5,8 @@
     <data>
 
         <variable
-                name="currency"
-                type="jacksondeng.revoluttest.model.entity.Currency" />
+                name="obj"
+                type="jacksondeng.revoluttest.model.entity.CurrencyModel" />
 
     </data>
 
@@ -15,13 +15,29 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-        <TextView
+
+        <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text="@{currency.name}"
-                android:textSize="16sp"
-                tools:text="SGD" />
+                android:orientation="vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="@{obj.currency.currencyCode}"
+                    android:textSize="14sp"
+                    tools:text="SGD" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="@{obj.currency.displayName}"
+                    android:textSize="14sp"
+                    tools:text="SGD" />
+
+        </LinearLayout>
 
         <View
                 android:layout_width="0dp"
@@ -32,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="@{String.valueOf(currency.rate)}"
+                android:text="@{String.valueOf(obj.rate)}"
                 android:textSize="16sp"
                 tools:text="123.20489" />
 

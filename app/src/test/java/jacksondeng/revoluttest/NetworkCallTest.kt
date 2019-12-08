@@ -2,6 +2,7 @@ package jacksondeng.revoluttest
 
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.SpyK
+import io.mockk.mockk
 import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.api.RatesApiImpl
 import kotlinx.coroutines.Dispatchers
@@ -16,12 +17,15 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import retrofit2.HttpException
+import retrofit2.Retrofit
 
 @ExperimentalCoroutinesApi
 class NetworkCallTest {
 
     @SpyK
     lateinit var api: RatesApiImpl
+
+    var retrofit = mockk<Retrofit>()
 
     private val testDispatcher = TestCoroutineDispatcher()
 
@@ -31,7 +35,7 @@ class NetworkCallTest {
     internal fun setUp() {
         MockKAnnotations.init(RatesApi::class)
         Dispatchers.setMain(testDispatcher)
-        api = RatesApiImpl()
+        api = RatesApiImpl(retrofit)
     }
 
     @After

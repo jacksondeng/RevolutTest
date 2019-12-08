@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
 import jacksondeng.revoluttest.databinding.ItemQueryRateBinding
-import jacksondeng.revoluttest.model.entity.Currency
+import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.view.viewholder.ExchangeRateViewHolder
 import jacksondeng.revoluttest.view.viewholder.QueryRateViewHolder
 
@@ -49,22 +49,26 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     // +1 for the first item (query item)
-    override fun getItemCount() = differ.currentList.size + 1
+    override fun getItemCount() = if (differ.currentList.isEmpty()) {
+        0
+    } else {
+        differ.currentList.size + 1
+    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (position) {
-            0 -> (holder as QueryRateViewHolder)
+            0 -> (holder as QueryRateViewHolder).bind()
             else -> (holder as ExchangeRateViewHolder).bind(differ.currentList[position - 1])
         }
     }
 
-    private val diffCallback = object : DiffUtil.ItemCallback<Currency>() {
-        override fun areItemsTheSame(oldItem: Currency, newItem: Currency): Boolean {
+    private val diffCallback = object : DiffUtil.ItemCallback<CurrencyModel>() {
+        override fun areItemsTheSame(oldItem: CurrencyModel, newItem: CurrencyModel): Boolean {
             return oldItem.rate == newItem.rate
         }
 
-        override fun areContentsTheSame(oldItem: Currency, newItem: Currency): Boolean {
-            return oldItem.name == newItem.name && oldItem.rate != newItem.rate
+        override fun areContentsTheSame(oldItem: CurrencyModel, newItem: CurrencyModel): Boolean {
+            return oldItem.currency.currencyCode == newItem.currency.currencyCode && oldItem.rate != newItem.rate
         }
     }
 
@@ -72,6 +76,6 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun clear() = differ.submitList(null)
 
-    fun submitList(list: List<Currency>?) = differ.submitList((list))
+    fun submitList(list: List<CurrencyModel>?) = differ.submitList((list))
 
 }
