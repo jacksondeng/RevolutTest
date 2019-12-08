@@ -50,13 +50,16 @@ class RatesRepositoryImpl @Inject constructor(
                 .subscribeOn(scheduler)
                 .distinctUntilChanged()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { rates ->
+                .subscribe({ rates ->
                     rates?.let {
-                        _rates.value = Result.Success(mapToModel(rates))
+                        _rates.value = Result.Success(mapToModel(it))
                     } ?: run {
                         _rates.value = Result.Failure(Throwable("Empty result"))
                     }
+                }, {
+                    _rates.value = Result.Failure(it)
                 })
+        )
     }
 
     override suspend fun getRates(base: String): Rates? {
