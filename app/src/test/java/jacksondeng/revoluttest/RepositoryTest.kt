@@ -109,10 +109,10 @@ class RepositoryTest {
         )
 
         val resultList = listOf(
-            CurrencyModel(Currency.getInstance("EUR"), 123.123, ""),
-            CurrencyModel(Currency.getInstance("USD"), 123.004, ""),
-            CurrencyModel(Currency.getInstance("SGD"), 0.0123, ""),
-            CurrencyModel(Currency.getInstance("TWD"), 100.0, "")
+            CurrencyModel(Currency.getInstance("EUR"), 123.123, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"),
+            CurrencyModel(Currency.getInstance("USD"), 123.004, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/usd.png"),
+            CurrencyModel(Currency.getInstance("SGD"), 0.0123, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/sgd.png"),
+            CurrencyModel(Currency.getInstance("TWD"), 100.0, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/twd.png")
         )
 
         val result = repo.generateCurrencies(dummyData)
