@@ -9,7 +9,6 @@ class QueryRateViewHolder(private val binding: ItemQueryRateBinding) :
 
     fun bind() {
         val currency = Currency.getInstance("GBP")
-        val currency1 = Currency.getInstance("1203i4")
         binding.queryCountry.text = "GBP"
         binding.countryDisplayName.text = currency.displayName
     }

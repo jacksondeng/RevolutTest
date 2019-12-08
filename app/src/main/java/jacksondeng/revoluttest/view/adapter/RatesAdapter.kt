@@ -64,11 +64,11 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val diffCallback = object : DiffUtil.ItemCallback<CurrencyModel>() {
         override fun areItemsTheSame(oldItem: CurrencyModel, newItem: CurrencyModel): Boolean {
-            return oldItem.rate == newItem.rate
+            return oldItem.currency.currencyCode == newItem.currency.currencyCode
         }
 
         override fun areContentsTheSame(oldItem: CurrencyModel, newItem: CurrencyModel): Boolean {
-            return oldItem.currency.currencyCode == newItem.currency.currencyCode && oldItem.rate != newItem.rate
+            return oldItem.currency.currencyCode == newItem.currency.currencyCode && oldItem.rate == newItem.rate
         }
     }
 
