@@ -1,22 +1,33 @@
 package jacksondeng.revoluttest.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.model.entity.Rates
+import jacksondeng.revoluttest.util.Result
 import jacksondeng.revoluttest.util.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class RatesViewModel(private val repo: RatesRepository) : ViewModel() {
+class RatesViewModel @Inject constructor(private val repo: RatesRepository) : ViewModel() {
 
     private var rates: Rates? = null
 
     private var _state = MutableLiveData<State>()
     val state: LiveData<State> = _state
+
+    val viewState: LiveData<State> = Transformations.map(repo.getRatesToObserve()) {
+        when (it) {
+            is Result.Success -> {
+                State.RefreshList(it.value)
+            }
+
+            is Result.Failure -> {
+                State.ShowEmptyScreen("Please try again later")
+            }
+        }
+    }
 
     fun getRates(base: String = "EUR") {
         viewModelScope.launch(Dispatchers.IO) {
@@ -30,4 +41,8 @@ class RatesViewModel(private val repo: RatesRepository) : ViewModel() {
             }
         }
     }
+
+    fun pollRates(base: String = "EUR") = repo.pollRates(base)
+
+    fun stopPolling() = repo.stopPolling()
 }

@@ -1,7 +1,6 @@
 package jacksondeng.revoluttest.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.Observer
@@ -28,7 +27,7 @@ class MainActivity : DaggerAppCompatActivity() {
         ratesAdapter = RatesAdapter()
         ratesRv.adapter = ratesAdapter
 
-        fab.setOnClickListener { view ->
+        fab.setOnClickListener {
             viewModel.getRates("EUR")
         }
 
@@ -43,6 +42,25 @@ class MainActivity : DaggerAppCompatActivity() {
                 }
             }
         })
+
+        viewModel.viewState.observe(this, Observer { state ->
+            when (state) {
+                is State.RefreshList -> {
+                    ratesAdapter.submitList(state.rates.rates)
+                }
+
+                is State.ShowEmptyScreen -> {
+                    // TODO: Show empty layout
+                }
+            }
+        })
+
+        val test = viewModel.pollRates("EUR")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopPolling()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
