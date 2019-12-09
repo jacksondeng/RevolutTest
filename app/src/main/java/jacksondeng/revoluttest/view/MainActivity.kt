@@ -30,19 +30,21 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     override fun getInputStream(flow: Flowable<String>) {
         compositeDisposable.add(
             flow.flatMap {
+                val multiplier = if (it.isNotEmpty()) {
+                    it.toDouble()
+                } else {
+                    1.0
+                }
                 viewModel.pausePolling()
-                Flowable.just(it)
+                viewModel.calculateRate(multiplier)
+                Flowable.just(multiplier)
             }
                 .delay(100, TimeUnit.MILLISECONDS)
-                .subscribe({ multiplier ->
-                    println("VALUES $multiplier")
+                .subscribe({
+                    println("MULTIPLY $it")
                     viewModel.pollRates(
                         base = "EUR",
-                        multiplier = if (multiplier.isNotEmpty()) {
-                            multiplier.toDouble()
-                        } else {
-                            1.0
-                        }
+                        multiplier = it
                     )
                 }, {
                     println("THROW $it")
@@ -96,7 +98,19 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
         viewModel.viewState.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {
-                    ratesAdapter.submitList(state.rates.rates)
+                    ratesAdapter.submitList(state.rates)
+                }
+
+                is State.ShowEmptyScreen -> {
+                    // TODO: Show empty layout
+                }
+            }
+        })
+
+        viewModel.state.observe(this, Observer { state ->
+            when (state) {
+                is State.RefreshList -> {
+                    ratesAdapter.submitList(state.rates)
                 }
 
                 is State.ShowEmptyScreen -> {

@@ -51,7 +51,10 @@ class RatesRepositoryImpl @Inject constructor(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ rates ->
                     rates?.let {
-                        _rates.value = Result.Success(mapToModel(it, multiplier))
+                        _rates.value = Result.Success(
+                            base = mapToModel(it, 1.0),
+                            value = mapToModel(it, multiplier)
+                        )
                     } ?: run {
                         _rates.value = Result.Failure(Throwable("Empty result"))
                     }

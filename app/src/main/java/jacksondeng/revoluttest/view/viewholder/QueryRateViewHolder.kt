@@ -24,7 +24,7 @@ class QueryRateViewHolder(
         binding.queryAmount.filters = arrayOf(CurrencyFormatInputFilter())
         interActionListener.getInputStream(flow = binding.queryAmount.addTextWatcher()
             .filter { it.type == EditTextFlow.Type.AFTER }
-            .debounce(1500, TimeUnit.MILLISECONDS)
+            .debounce(150, TimeUnit.MILLISECONDS)
             .map { it.query })
     }
 }
