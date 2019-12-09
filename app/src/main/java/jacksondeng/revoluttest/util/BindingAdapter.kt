@@ -3,6 +3,7 @@ package jacksondeng.revoluttest.util
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -29,4 +30,13 @@ fun loadImage(view: ImageView, imageUrl: String) {
             }
 
         })
+}
+
+@BindingAdapter("bind:showRate")
+fun showRate(view: TextView, rate: Double) {
+    if (rate == Double.POSITIVE_INFINITY) {
+        view.text = view.context.getString(R.string.string_caculation_overflowed)
+    } else {
+        view.text = rate.toString()
+    }
 }

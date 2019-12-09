@@ -95,12 +95,12 @@ class RatesRepositoryImpl @Inject constructor(
 
             rates.map {
                 // Only consider the rate is valid if it is >= 0
-                if(it.value >= 0) {
+                if (it.value >= 0) {
                     try {
                         this.add(
                             CurrencyModel(
                                 currency = Currency.getInstance(it.key),
-                                rate = it.value * multiplier,
+                                rate = getCalculatedExchangeRate(it.value, multiplier),
                                 imageUrl = getImageUrl(it.key)
                             )
                         )
@@ -117,4 +117,17 @@ class RatesRepositoryImpl @Inject constructor(
     override fun pausePolling() = compositeDisposable.clear()
 
     override fun getRatesToObserve() = rates
+
+    // Set the exchange rate to
+    fun getCalculatedExchangeRate(rate: Double, multiplier: Double): Double {
+        return if (checkForOverflow(rate, multiplier)) {
+            Double.POSITIVE_INFINITY
+        } else {
+            rate * multiplier
+        }
+    }
+
+    fun checkForOverflow(rate: Double, multiplier: Double): Boolean {
+        return (rate * multiplier == Double.POSITIVE_INFINITY || rate * multiplier == Double.NEGATIVE_INFINITY)
+    }
 }
