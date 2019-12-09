@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import dagger.android.support.DaggerAppCompatActivity
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
@@ -57,6 +58,8 @@ class MainActivity : DaggerAppCompatActivity() {
         ratesRv.apply {
             adapter = ratesAdapter
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
+            // Prevent imageview flickering when submitList is called
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
