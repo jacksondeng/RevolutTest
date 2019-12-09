@@ -109,14 +109,127 @@ class RepositoryTest {
         )
 
         val resultList = listOf(
-            CurrencyModel(Currency.getInstance("EUR"), 0.0, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"),
-            CurrencyModel(Currency.getInstance("EUR"), 123.123, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"),
-            CurrencyModel(Currency.getInstance("USD"), 123.004, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/usd.png"),
-            CurrencyModel(Currency.getInstance("SGD"), 0.0123, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/sgd.png"),
-            CurrencyModel(Currency.getInstance("TWD"), 100.0, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/twd.png")
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                0.0,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                123.123,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("USD"),
+                123.004,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/usd.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("SGD"),
+                0.0123,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/sgd.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("TWD"),
+                100.0,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/twd.png"
+            )
         )
 
-        val result = repo.generateCurrencies("EUR",dummyData)
+        val result = repo.generateCurrencies("EUR", 1.0, dummyData)
+        println("$result")
+        Assert.assertNotNull(result)
+        Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))
+    }
+
+    @Test
+    internal fun `poll rates with multiplier test`() {
+        val dummyData = mapOf(
+            Pair("EUR", 123.123),
+            Pair("USD", 123.004),
+            Pair("SGD", 0.0123),
+            Pair("ABC", -120.1),
+            Pair("TWD", 100.0)
+        )
+
+        val resultList = listOf(
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                0.0,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                123.123 * 1.12,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("USD"),
+                123.004 * 1.12,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/usd.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("SGD"),
+                0.0123 * 1.12,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/sgd.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("TWD"),
+                100.0 * 1.12,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/twd.png"
+            )
+        )
+
+        val result = repo.generateCurrencies("EUR", 1.12, dummyData)
+        println("$result")
+        Assert.assertNotNull(result)
+        Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))
+    }
+
+    @Test
+    internal fun `generate currencies list with negative value test`() {
+        val dummyData = mapOf(
+            Pair("EUR", 123.123),
+            Pair("SGD", -120.1),
+            Pair("TWD", 100.0)
+        )
+
+        val resultList = listOf(
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                0.0,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                123.123,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            ),
+            CurrencyModel(
+                Currency.getInstance("TWD"),
+                100.0,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/twd.png"
+            )
+        )
+
+        val result = repo.generateCurrencies("EUR", 1.0, dummyData)
+        println("$result")
+        Assert.assertNotNull(result)
+        Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))
+    }
+
+    @Test
+    internal fun `generate currencies with empty list test`() {
+        val dummyData = mapOf<String, Double>()
+        val resultList = listOf(
+            CurrencyModel(
+                Currency.getInstance("EUR"),
+                0.0,
+                "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
+            )
+        )
+
+        val result = repo.generateCurrencies("EUR", 1000000.0, dummyData)
         println("$result")
         Assert.assertNotNull(result)
         Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))

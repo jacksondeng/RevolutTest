@@ -18,11 +18,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-
 interface RatesRepository {
     suspend fun getRates(base: String): Rates?
     fun getRatesToObserve(): LiveData<Result<Rates>>
-    fun pollRates(base: String)
+    fun pollRates(base: String, multiplier: Double = 1.0)
     fun stopPolling()
     fun pausePolling()
 }
@@ -38,7 +37,7 @@ class RatesRepositoryImpl @Inject constructor(
 
     private var compositeDisposable = CompositeDisposable()
 
-    override fun pollRates(base: String) {
+    override fun pollRates(base: String, multiplier: Double) {
         // Prevent overlapping requests
         val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         compositeDisposable.add(
@@ -52,7 +51,7 @@ class RatesRepositoryImpl @Inject constructor(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ rates ->
                     rates?.let {
-                        _rates.value = Result.Success(mapToModel(it))
+                        _rates.value = Result.Success(mapToModel(it, multiplier))
                     } ?: run {
                         _rates.value = Result.Failure(Throwable("Empty result"))
                     }
@@ -65,21 +64,25 @@ class RatesRepositoryImpl @Inject constructor(
     override suspend fun getRates(base: String): Rates? {
         return try {
             val dto = api.getRates(base)
-            mapToModel(dto)
+            mapToModel(dto, 1.0)
         } catch (exception: Exception) {
             cachedRates.getCachedRates(base)
         }
     }
 
-    private fun mapToModel(dto: RatesDTO): Rates {
-        return Rates(dto.base, generateCurrencies(dto.base, dto.rates))
+    private fun mapToModel(dto: RatesDTO, multiplier: Double): Rates {
+        return Rates(dto.base, generateCurrencies(dto.base, multiplier, dto.rates))
     }
 
     private fun getImageUrl(countryCode: String): String {
         return "$BASE_THUMBNAIL_URL${countryCode.toLowerCase(Locale.US)}.png"
     }
 
-    fun generateCurrencies(base: String, rates: Map<String, Double>): List<CurrencyModel> {
+    fun generateCurrencies(
+        base: String,
+        multiplier: Double,
+        rates: Map<String, Double>
+    ): List<CurrencyModel> {
         return mutableListOf<CurrencyModel>().apply {
             // Append an item as the queried item
             this.add(
@@ -91,16 +94,19 @@ class RatesRepositoryImpl @Inject constructor(
             )
 
             rates.map {
-                try {
-                    this.add(
-                        CurrencyModel(
-                            currency = Currency.getInstance(it.key),
-                            rate = it.value,
-                            imageUrl = getImageUrl(it.key)
+                // Only consider the rate is valid if it is >= 0
+                if(it.value >= 0) {
+                    try {
+                        this.add(
+                            CurrencyModel(
+                                currency = Currency.getInstance(it.key),
+                                rate = it.value * multiplier,
+                                imageUrl = getImageUrl(it.key)
+                            )
                         )
-                    )
-                } catch (exception: IllegalArgumentException) {
-                    // Handle unknown country code
+                    } catch (exception: IllegalArgumentException) {
+                        // Handle unknown country code
+                    }
                 }
             }
         }

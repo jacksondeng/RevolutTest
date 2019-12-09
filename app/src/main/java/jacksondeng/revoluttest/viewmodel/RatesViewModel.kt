@@ -17,6 +17,8 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
     private var _state = MutableLiveData<State>()
     val state: LiveData<State> = _state
 
+    private var multiplier: Double = 1.0
+
     val viewState: LiveData<State> = Transformations.map(repo.getRatesToObserve()) {
         when (it) {
             is Result.Success -> {
@@ -42,9 +44,13 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
         }
     }
 
-    fun pollRates(base: String = "EUR") = repo.pollRates(base)
+    fun pollRates(base: String = "EUR") = repo.pollRates(base, multiplier)
 
     fun stopPolling() = repo.stopPolling()
 
     fun pausePolling() = repo.pausePolling()
+
+    fun setMultiplier(multiplier: Double) {
+        this.multiplier = multiplier
+    }
 }
