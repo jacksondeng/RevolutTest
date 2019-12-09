@@ -72,15 +72,24 @@ class RatesRepositoryImpl @Inject constructor(
     }
 
     private fun mapToModel(dto: RatesDTO): Rates {
-        return Rates(dto.base, generateCurrencies(dto.rates))
+        return Rates(dto.base, generateCurrencies(dto.base, dto.rates))
     }
 
     private fun getImageUrl(countryCode: String): String {
         return "$BASE_THUMBNAIL_URL${countryCode.toLowerCase(Locale.US)}.png"
     }
 
-    fun generateCurrencies(rates: Map<String, Double>): List<CurrencyModel> {
+    fun generateCurrencies(base: String, rates: Map<String, Double>): List<CurrencyModel> {
         return mutableListOf<CurrencyModel>().apply {
+            // Append an item as the queried item
+            this.add(
+                CurrencyModel(
+                    currency = Currency.getInstance(base),
+                    rate = 0.0,
+                    imageUrl = getImageUrl(base)
+                )
+            )
+
             rates.map {
                 try {
                     this.add(

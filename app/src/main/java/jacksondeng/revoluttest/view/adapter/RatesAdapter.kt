@@ -57,16 +57,12 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     // +1 for the first item (query item)
-    override fun getItemCount() = if (differ.currentList.isEmpty()) {
-        0
-    } else {
-        differ.currentList.size + 1
-    }
+    override fun getItemCount() = differ.currentList.size
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (position) {
-            0 -> (holder as QueryRateViewHolder).bind()
-            else -> (holder as ExchangeRateViewHolder).bind(differ.currentList[position - 1])
+            0 -> (holder as QueryRateViewHolder).bind(differ.currentList[position])
+            else -> (holder as ExchangeRateViewHolder).bind(differ.currentList[position])
         }
     }
 

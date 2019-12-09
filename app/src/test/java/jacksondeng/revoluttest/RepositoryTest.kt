@@ -33,7 +33,7 @@ class RepositoryTest {
     private val cachedRates = mockk<CachedRates>()
 
     private val validResponse = RatesDTO(
-        "abc",
+        "EUR",
         "2019-01-12",
         mapOf(Pair("AUD", 2104935.0), Pair("SGD", 1208402.11))
     )
@@ -109,13 +109,14 @@ class RepositoryTest {
         )
 
         val resultList = listOf(
+            CurrencyModel(Currency.getInstance("EUR"), 0.0, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"),
             CurrencyModel(Currency.getInstance("EUR"), 123.123, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"),
             CurrencyModel(Currency.getInstance("USD"), 123.004, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/usd.png"),
             CurrencyModel(Currency.getInstance("SGD"), 0.0123, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/sgd.png"),
             CurrencyModel(Currency.getInstance("TWD"), 100.0, "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/twd.png")
         )
 
-        val result = repo.generateCurrencies(dummyData)
+        val result = repo.generateCurrencies("EUR",dummyData)
         println("$result")
         Assert.assertNotNull(result)
         Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))
