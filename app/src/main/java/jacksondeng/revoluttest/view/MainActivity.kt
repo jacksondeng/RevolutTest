@@ -7,20 +7,48 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import dagger.android.support.DaggerAppCompatActivity
+import io.reactivex.Flowable
+import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
+import jacksondeng.revoluttest.view.adapter.InterActionListener
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class MainActivity : DaggerAppCompatActivity() {
-
+class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     @Inject
     lateinit var viewModel: RatesViewModel
 
-    lateinit var ratesAdapter: RatesAdapter
+    private lateinit var ratesAdapter: RatesAdapter
+
+    private val compositeDisposable = CompositeDisposable()
+
+    override fun getInputStream(flow: Flowable<String>) {
+        compositeDisposable.add(
+            flow.flatMap {
+                viewModel.pausePolling()
+                Flowable.just(it)
+            }
+                .delay(100, TimeUnit.MILLISECONDS)
+                .subscribe({ multiplier ->
+                    println("VALUES $multiplier")
+                    viewModel.pollRates(
+                        base = "EUR",
+                        multiplier = if (multiplier.isNotEmpty()) {
+                            multiplier.toDouble()
+                        } else {
+                            1.0
+                        }
+                    )
+                }, {
+                    println("THROW $it")
+                })
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +70,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        compositeDisposable.dispose()
         viewModel.stopPolling()
     }
 
@@ -51,7 +80,7 @@ class MainActivity : DaggerAppCompatActivity() {
     }
 
     private fun initAdapters() {
-        ratesAdapter = RatesAdapter()
+        ratesAdapter = RatesAdapter(this@MainActivity)
     }
 
     private fun initRv(context: Context) {

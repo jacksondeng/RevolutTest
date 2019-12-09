@@ -6,6 +6,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.Flowable
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
 import jacksondeng.revoluttest.databinding.ItemQueryRateBinding
@@ -16,11 +17,13 @@ import jacksondeng.revoluttest.view.viewholder.QueryRateViewHolder
 const val VIEW_TYPE_QUERY_RATE = 0
 const val VIEW_TYPE_EXCHANGE_RATE = 1
 
-class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    init {
-        setHasStableIds(true)
-    }
+interface InterActionListener {
+    fun onItemClicked(position: Int) {}
+    fun getInputStream(flow: Flowable<String>)
+}
 
+class RatesAdapter(private val interActionListener: InterActionListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
             VIEW_TYPE_QUERY_RATE -> {
@@ -28,7 +31,7 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 val binding: ItemQueryRateBinding = DataBindingUtil.inflate(
                     layoutInflater, R.layout.item_query_rate, parent, false
                 )
-                return QueryRateViewHolder(binding)
+                return QueryRateViewHolder(binding, interActionListener)
             }
 
             VIEW_TYPE_EXCHANGE_RATE -> {
@@ -43,10 +46,6 @@ class RatesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 throw IllegalArgumentException("Invalid view type: $viewType")
             }
         }
-    }
-
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
     }
 
     override fun getItemViewType(position: Int): Int {

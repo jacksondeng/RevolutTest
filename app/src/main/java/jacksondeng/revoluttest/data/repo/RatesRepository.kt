@@ -35,7 +35,7 @@ class RatesRepositoryImpl @Inject constructor(
     private var _rates = MutableLiveData<Result<Rates>>()
     private var rates: LiveData<Result<Rates>> = _rates
 
-    private var compositeDisposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
     override fun pollRates(base: String, multiplier: Double) {
         // Prevent overlapping requests
