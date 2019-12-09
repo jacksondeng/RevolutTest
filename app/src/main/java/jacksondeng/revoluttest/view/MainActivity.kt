@@ -52,6 +52,13 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
         )
     }
 
+    override fun onItemClicked(position: Int) {
+        super.onItemClicked(position)
+        viewModel.pausePolling()
+        ratesAdapter.moveItemToTop(position)
+        ratesRv.smoothScrollToPosition(0)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

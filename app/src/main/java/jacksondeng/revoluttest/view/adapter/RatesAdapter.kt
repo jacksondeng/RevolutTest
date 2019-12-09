@@ -13,6 +13,7 @@ import jacksondeng.revoluttest.databinding.ItemQueryRateBinding
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.view.viewholder.ExchangeRateViewHolder
 import jacksondeng.revoluttest.view.viewholder.QueryRateViewHolder
+import java.util.*
 
 const val VIEW_TYPE_QUERY_RATE = 0
 const val VIEW_TYPE_EXCHANGE_RATE = 1
@@ -39,7 +40,7 @@ class RatesAdapter(private val interActionListener: InterActionListener) :
                 val binding: ItemExchangeRateBinding = DataBindingUtil.inflate(
                     layoutInflater, R.layout.item_exchange_rate, parent, false
                 )
-                return ExchangeRateViewHolder(binding)
+                return ExchangeRateViewHolder(binding, interActionListener)
             }
 
             else -> {
@@ -81,4 +82,9 @@ class RatesAdapter(private val interActionListener: InterActionListener) :
 
     fun submitList(list: List<CurrencyModel>?) = differ.submitList((list))
 
+    fun moveItemToTop(position: Int) {
+        val list = differ.currentList.toMutableList()
+        Collections.swap(list, 0, position)
+        submitList(list)
+    }
 }
