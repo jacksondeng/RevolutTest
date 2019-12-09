@@ -27,21 +27,15 @@ class NetworkCallTest {
 
     var retrofit = mockk<Retrofit>()
 
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    private val testScope = TestCoroutineScope(testDispatcher)
-
     @Before
     internal fun setUp() {
         MockKAnnotations.init(RatesApi::class)
-        Dispatchers.setMain(testDispatcher)
         api = RatesApiImpl(retrofit)
     }
 
     @After
     fun teardown() {
-        Dispatchers.resetMain()
-        testScope.cleanupTestCoroutines()
+
     }
 
 

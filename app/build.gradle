@@ -60,7 +60,6 @@ dependencies {
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:${libraries.retrofit}"
     implementation "com.squareup.retrofit2:converter-moshi:${libraries.moshi}"
-    implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:${libraries.coroutinesAdapter}"
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
 
     // OkHttp
@@ -74,11 +73,6 @@ dependencies {
     annotationProcessor "com.google.dagger:dagger-android-processor:${libraries.dagger}"
     kapt "com.google.dagger:dagger-compiler:${libraries.dagger}"
     kapt "com.google.dagger:dagger-android-processor:${libraries.dagger}"
-
-    // Coroutines
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${libraries.viewModelKTX}"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${libraries.coroutines}"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libraries.coroutines}"
 
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.10'

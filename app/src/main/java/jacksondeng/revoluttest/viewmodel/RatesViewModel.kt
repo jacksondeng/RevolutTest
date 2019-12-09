@@ -1,14 +1,14 @@
 package jacksondeng.revoluttest.viewmodel
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.ViewModel
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.Result
 import jacksondeng.revoluttest.util.State
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class RatesViewModel @Inject constructor(private val repo: RatesRepository) : ViewModel() {
@@ -29,19 +29,6 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
 
             is Result.Failure -> {
                 State.ShowEmptyScreen("Please try again later")
-            }
-        }
-    }
-
-    fun getRates(base: String = "EUR") {
-        viewModelScope.launch(Dispatchers.IO) {
-            baseRate = repo.getRates(base)
-            withContext(Dispatchers.Main) {
-                baseRate?.let {
-                    _state.value = State.RefreshList(it.rates)
-                } ?: run {
-                    _state.value = State.ShowEmptyScreen("Please try again later")
-                }
             }
         }
     }

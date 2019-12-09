@@ -1,6 +1,5 @@
 package jacksondeng.revoluttest.di.module
 
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import jacksondeng.revoluttest.data.api.RatesApi
@@ -30,7 +29,6 @@ class NetworkModule {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .addConverterFactory(MoshiConverterFactory.create())
             .client(client)
             .build()
