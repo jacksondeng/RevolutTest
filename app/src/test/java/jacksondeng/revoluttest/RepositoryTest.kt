@@ -234,4 +234,38 @@ class RepositoryTest {
         Assert.assertNotNull(result)
         Assert.assertTrue(result.size == resultList.size && result.containsAll(resultList))
     }
+
+    @Test
+    internal fun `exchange rate calculation check overflow test`() {
+        Assert.assertEquals(true, repo.checkForOverflow(Double.MAX_VALUE, Double.MAX_VALUE))
+    }
+
+    @Test
+    internal fun `exchange rate calculation doesn't overflow test`() {
+        Assert.assertEquals(false, repo.checkForOverflow(0.9, Double.MAX_VALUE * -1))
+    }
+
+    @Test
+    internal fun `calculate exchange rate test (overflowed)`() {
+        Assert.assertEquals(
+            Double.POSITIVE_INFINITY,
+            repo.getCalculatedExchangeRate(Double.MAX_VALUE, 2.0),
+            0.000000001
+        )
+    }
+
+    @Test
+    internal fun `calculate exchange rate test (doens't overflow)`() {
+        Assert.assertNotEquals(
+            Double.POSITIVE_INFINITY,
+            repo.getCalculatedExchangeRate(100000000000000000000000000.120480, 2.0),
+            0.000000001
+        )
+
+        Assert.assertEquals(
+            100000000000000000000000000.120480 * 2.0,
+            repo.getCalculatedExchangeRate(100000000000000000000000000.120480, 2.0),
+            0.000000001
+        )
+    }
 }
