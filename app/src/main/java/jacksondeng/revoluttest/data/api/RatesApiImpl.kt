@@ -11,10 +11,4 @@ class RatesApiImpl @Inject constructor(private val retrofit: Retrofit) : RatesAp
             .create(RatesApi::class.java)
             .pollRates(base)
     }
-
-    override suspend fun getRates(base: String): RatesDTO {
-        return retrofit
-            .create(RatesApi::class.java)
-            .getRates(base)
-    }
 }

@@ -37,46 +37,4 @@ class NetworkCallTest {
     fun teardown() {
 
     }
-
-
-    @Test
-    internal fun `api success and response not null`() {
-        runBlocking {
-            try {
-                val result = api.getRates("EUR")
-                println("$result")
-                Assert.assertNotNull(result)
-            } catch (exception: Exception) {
-                Assert.fail()
-            }
-        }
-    }
-
-    @Test
-    internal fun `api call with invalid query string`() {
-        runBlocking {
-            try {
-                api.getRates("30urefjefjhp9")
-                Assert.fail()
-            } catch (exception: Exception) {
-                println("$exception")
-                Assert.assertTrue(exception is HttpException)
-                Assert.assertTrue(exception.message?.contains("HTTP 422") ?: true)
-            }
-        }
-    }
-
-    @Test
-    internal fun `api call with empty query string`() {
-        runBlocking {
-            try {
-                api.getRates("")
-                Assert.fail()
-            } catch (exception: Exception) {
-                println("$exception")
-                Assert.assertTrue(exception is HttpException)
-                Assert.assertTrue(exception.message?.contains("HTTP 422") ?: true)
-            }
-        }
-    }
 }

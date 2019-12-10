@@ -32,70 +32,16 @@ class RepositoryTest {
 
     private val cachedRates = mockk<CachedRates>()
 
-    private val validResponse = RatesDTO(
-        "EUR",
-        "2019-01-12",
-        mapOf(Pair("AUD", 2104935.0), Pair("SGD", 1208402.11))
-    )
-
-    private val validCache = Rates(
-        base = "EUR",
-        rates = listOf(
-            CurrencyModel(Currency.getInstance("USD"), 2104935.0, ""),
-            CurrencyModel(Currency.getInstance("SGD"), 1208402.11, "")
-        )
-    )
-
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    private val testScope = TestCoroutineScope(testDispatcher)
-
     lateinit var repo: RatesRepositoryImpl
 
     @Before
     internal fun setUp() {
-        MockitoAnnotations.initMocks(RatesRepository::class)
-        Dispatchers.setMain(testDispatcher)
         repo = RatesRepositoryImpl(api, cachedRates)
     }
 
     @After
     fun teardown() {
-        Dispatchers.resetMain()
-        testScope.cleanupTestCoroutines()
-    }
 
-    @Test
-    internal fun `api success`() {
-        coEvery { api.getRates("EUR") } returns validResponse
-
-        runBlocking {
-            val result = repo.getRates("EUR")
-            println("$result")
-            Assert.assertNotNull(result)
-        }
-    }
-
-    @Test
-    internal fun `api failed and cached rates not null`() {
-        coEvery { api.getRates("EUR") }
-        every { cachedRates.getCachedRates("EUR") } returns validCache
-        runBlocking {
-            val result = repo.getRates("EUR")
-            println("$result")
-            Assert.assertNotNull(result)
-        }
-    }
-
-    @Test
-    internal fun `api failed and cached rates is null`() {
-        coEvery { api.getRates("EUR") }
-        every { cachedRates.getCachedRates("EUR") } returns null
-        runBlocking {
-            val result = repo.getRates("EUR")
-            println("$result")
-            Assert.assertNull(result)
-        }
     }
 
     @Test
