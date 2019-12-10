@@ -4,7 +4,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import jacksondeng.revoluttest.data.api.RatesApi
-import jacksondeng.revoluttest.data.cache.CachedRates
+import jacksondeng.revoluttest.data.cache.dao.RatesDao
 import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
@@ -20,7 +20,7 @@ interface RatesRepository {
 
 class RatesRepositoryImpl @Inject constructor(
     private val api: RatesApi,
-    private val cachedRates: CachedRates
+    private val ratesDao: RatesDao
 ) :
     RatesRepository {
 

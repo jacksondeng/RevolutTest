@@ -6,7 +6,6 @@ import dagger.android.support.AndroidSupportInjectionModule
 import jacksondeng.revoluttest.RevolutApplication
 import jacksondeng.revoluttest.di.builder.ActivityBuilder
 
-
 @Component(modules = [AndroidSupportInjectionModule::class, ActivityBuilder::class])
 interface AppComponent : AndroidInjector<RevolutApplication> {
     @Component.Builder

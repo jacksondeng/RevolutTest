@@ -2,6 +2,7 @@ package jacksondeng.revoluttest.di.builder
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import jacksondeng.revoluttest.data.cache.db.RatesDb
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.di.module.NetworkModule
 import jacksondeng.revoluttest.di.module.RatesRepositoryModule

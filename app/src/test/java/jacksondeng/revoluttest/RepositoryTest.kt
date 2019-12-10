@@ -1,27 +1,14 @@
 package jacksondeng.revoluttest
 
-import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import jacksondeng.revoluttest.data.api.RatesApi
-import jacksondeng.revoluttest.data.cache.CachedRates
-import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
-import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
-import jacksondeng.revoluttest.model.entity.Rates
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.MockitoAnnotations
 import java.util.*
 
 

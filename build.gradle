@@ -13,13 +13,14 @@ buildscript {
         ]
 
         libraries = [
-                recyclerview     : "1.1.0",
-                constraintLayout : "1.1.3",
-                retrofit         : "2.6.0",
-                moshi            : "2.6.0",
-                okHttp           : "3.12.0",
-                okHttpLog        : "3.11.0",
-                dagger           : "2.17"
+                recyclerview    : "1.1.0",
+                constraintLayout: "1.1.3",
+                retrofit        : "2.6.0",
+                moshi           : "2.6.0",
+                okHttp          : "3.12.0",
+                okHttpLog       : "3.11.0",
+                dagger          : "2.17",
+                room            : "2.2.2"
         ]
     }
 

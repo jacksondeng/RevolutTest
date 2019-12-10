@@ -10,7 +10,7 @@ import javax.inject.Singleton
 class RevolutAppModule {
     @Singleton
     @Provides
-    internal fun provideContext(application: RevolutApplication): Context {
+    fun provideContext(application: RevolutApplication): Context {
         return application
     }
 }
