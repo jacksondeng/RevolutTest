@@ -33,8 +33,10 @@ class RatesRepositoryImpl @Inject constructor(
         return (
                 Observable.interval(2, TimeUnit.SECONDS)
                     .flatMap {
-                        //api.pollRates(base).retry(3)
-                        ratesDao.getRates("EUR")
+                        Observable.concat(
+                            ratesDao.getRates("EUR"),
+                            api.pollRates(base).retry(3)
+                        )
                     }
                     .subscribeOn(scheduler)
                     .doOnNext {
@@ -49,8 +51,7 @@ class RatesRepositoryImpl @Inject constructor(
                     .observeOn(AndroidSchedulers.mainThread())
                     .flatMap {
                         Observable.just(mapToModel(it, multiplier))
-                    }
-                )
+                    })
     }
 
     private fun mapToModel(dto: RatesDTO, multiplier: Double): Rates {
