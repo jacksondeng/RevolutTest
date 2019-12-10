@@ -1,5 +1,6 @@
 package jacksondeng.revoluttest.di.module
 
+import android.content.SharedPreferences
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -25,7 +26,11 @@ class RatesRepositoryModule {
     }
 
     @Provides
-    fun providesRatesRepo(api: RatesApi, ratesDao: RatesDao): RatesRepository {
-        return RatesRepositoryImpl(api, ratesDao)
+    fun providesRatesRepo(
+        api: RatesApi,
+        ratesDao: RatesDao,
+        sharePref: SharedPreferences
+    ): RatesRepository {
+        return RatesRepositoryImpl(api, ratesDao, sharePref)
     }
 }

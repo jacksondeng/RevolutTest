@@ -1,5 +1,6 @@
 package jacksondeng.revoluttest.data.repo
 
+import android.content.SharedPreferences
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -9,6 +10,7 @@ import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.BASE_THUMBNAIL_URL
+import jacksondeng.revoluttest.util.TAG_LAST_CACHED_TIME
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -20,7 +22,8 @@ interface RatesRepository {
 
 class RatesRepositoryImpl @Inject constructor(
     private val api: RatesApi,
-    private val ratesDao: RatesDao
+    private val ratesDao: RatesDao,
+    private val sharePref: SharedPreferences
 ) :
     RatesRepository {
 
@@ -30,9 +33,18 @@ class RatesRepositoryImpl @Inject constructor(
         return (
                 Observable.interval(2, TimeUnit.SECONDS)
                     .flatMap {
-                        api.pollRates(base).retry(3)
+                        //api.pollRates(base).retry(3)
+                        ratesDao.getRates("EUR")
                     }
                     .subscribeOn(scheduler)
+                    .doOnNext {
+                        if (sharePref.getLong(TAG_LAST_CACHED_TIME, -1L) == -1L) {
+                            ratesDao.cache(it)
+                            sharePref.edit()
+                                .putLong(TAG_LAST_CACHED_TIME, System.currentTimeMillis())
+                                .apply()
+                        }
+                    }
                     .distinctUntilChanged()
                     .observeOn(AndroidSchedulers.mainThread())
                     .flatMap {

@@ -4,13 +4,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import jacksondeng.revoluttest.model.entity.TempModel
+import io.reactivex.Observable
+import jacksondeng.revoluttest.model.dto.RatesDTO
+import jacksondeng.revoluttest.util.TABLE_NAME_RATES
 
 @Dao
 interface RatesDao {
-    @Query("SELECT * FROM TempTable")
-    fun all(): List<TempModel>
+    @Query("SELECT * FROM $TABLE_NAME_RATES WHERE base = :base")
+    fun getRates(base: String): Observable<RatesDTO>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(data: TempModel): Long
+    fun cache(rates: RatesDTO): Long
 }

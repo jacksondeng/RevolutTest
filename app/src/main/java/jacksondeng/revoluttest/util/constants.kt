@@ -6,3 +6,6 @@ const val BASE_THUMBNAIL_URL = "https://raw.githubusercontent.com/transferwise/c
 const val DB_NAME = "RatesDB"
 const val DB_VERSION = 1
 const val TABLE_NAME_CURRENCY = "CurrencyTable"
+const val TABLE_NAME_RATES = "RatesTable"
+const val PREF_FILE_NAME = "rates.pref"
+const val TAG_LAST_CACHED_TIME = "lastCachedTime"
