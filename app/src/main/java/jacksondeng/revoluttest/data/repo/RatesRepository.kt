@@ -1,10 +1,7 @@
 package jacksondeng.revoluttest.data.repo
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.cache.CachedRates
@@ -12,18 +9,13 @@ import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.BASE_THUMBNAIL_URL
-import jacksondeng.revoluttest.util.Result
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 interface RatesRepository {
-    suspend fun getRates(base: String): Rates?
-    fun getRatesToObserve(): LiveData<Result<Rates>>
-    fun pollRates(base: String, multiplier: Double = 1.0)
-    fun stopPolling()
-    fun pausePolling()
+    fun pollRates(base: String, multiplier: Double = 1.0): Observable<Rates>
 }
 
 class RatesRepositoryImpl @Inject constructor(
@@ -32,45 +24,21 @@ class RatesRepositoryImpl @Inject constructor(
 ) :
     RatesRepository {
 
-    private var _rates = MutableLiveData<Result<Rates>>()
-    private var rates: LiveData<Result<Rates>> = _rates
-
-    private val compositeDisposable = CompositeDisposable()
-
-    override fun pollRates(base: String, multiplier: Double) {
+    override fun pollRates(base: String, multiplier: Double): Observable<Rates> {
         // Prevent overlapping requests
         val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
-        compositeDisposable.add(
-            Observable.interval(2, TimeUnit.SECONDS)
-                .flatMap {
-                    api.pollRates(base)
-                        .retry(3)
-                }
-                .subscribeOn(scheduler)
-                .distinctUntilChanged()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ rates ->
-                    rates?.let {
-                        _rates.value = Result.Success(
-                            base = mapToModel(it, 1.0),
-                            value = mapToModel(it, multiplier)
-                        )
-                    } ?: run {
-                        _rates.value = Result.Failure(Throwable("Empty result"))
+        return (
+                Observable.interval(2, TimeUnit.SECONDS)
+                    .flatMap {
+                        api.pollRates(base).retry(3)
                     }
-                }, {
-                    _rates.value = Result.Failure(it)
-                })
-        )
-    }
-
-    override suspend fun getRates(base: String): Rates? {
-        return try {
-            val dto = api.getRates(base)
-            mapToModel(dto, 1.0)
-        } catch (exception: Exception) {
-            cachedRates.getCachedRates(base)
-        }
+                    .subscribeOn(scheduler)
+                    .distinctUntilChanged()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .flatMap {
+                        Observable.just(mapToModel(it, multiplier))
+                    }
+                )
     }
 
     private fun mapToModel(dto: RatesDTO, multiplier: Double): Rates {
@@ -115,13 +83,7 @@ class RatesRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun stopPolling() = compositeDisposable.dispose()
-
-    override fun pausePolling() = compositeDisposable.clear()
-
-    override fun getRatesToObserve() = rates
-
-    // Set the exchange rate to
+    // Set the exchange rate to POSITIVE_INFINITY indicate overflow happened
     fun getCalculatedExchangeRate(rate: Double, multiplier: Double): Double {
         return if (checkForOverflow(rate, multiplier)) {
             Double.POSITIVE_INFINITY
@@ -132,5 +94,9 @@ class RatesRepositoryImpl @Inject constructor(
 
     fun checkForOverflow(rate: Double, multiplier: Double): Boolean {
         return (rate * multiplier == Double.POSITIVE_INFINITY || rate * multiplier == Double.NEGATIVE_INFINITY)
+    }
+
+    fun cacheRate() {
+        // TODO: Implement caching mechanism
     }
 }

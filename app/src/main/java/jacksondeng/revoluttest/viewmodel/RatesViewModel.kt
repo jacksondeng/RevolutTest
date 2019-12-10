@@ -2,12 +2,11 @@ package jacksondeng.revoluttest.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
-import jacksondeng.revoluttest.util.Result
 import jacksondeng.revoluttest.util.State
 import javax.inject.Inject
 
@@ -20,20 +19,23 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
 
     private var multiplier: Double = 1.0
 
-    val viewState: LiveData<State> = Transformations.map(repo.getRatesToObserve()) {
-        when (it) {
-            is Result.Success -> {
-                baseRate = it.base
-                State.RefreshList(it.value.rates)
-            }
+    private var compositeDisposable = CompositeDisposable()
 
-            is Result.Failure -> {
-                State.ShowEmptyScreen("Please try again later")
-            }
-        }
+    fun pollRates(base: String = "EUR", multiplier: Double = 1.0) {
+        compositeDisposable.add(
+            repo.pollRates(base, multiplier)
+                .subscribe({ rates ->
+                    baseRate = rates
+                    rates?.let {
+                        _state.value = State.RefreshList(it.rates)
+                    } ?: run {
+                        State.ShowEmptyScreen("Please try again later")
+                    }
+                }, {
+                    State.ShowEmptyScreen("Please try again later")
+                })
+        )
     }
-
-    fun pollRates(base: String = "EUR", multiplier: Double = 1.0) = repo.pollRates(base, multiplier)
 
     fun calculateRate(multiplier: Double) {
         baseRate?.rates?.let { rates ->
@@ -44,7 +46,12 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
         }
     }
 
-    fun stopPolling() = repo.stopPolling()
+    fun stopPolling() = compositeDisposable.dispose()
 
-    fun pausePolling() = repo.pausePolling()
+    fun pausePolling() = compositeDisposable.clear()
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
+    }
 }

@@ -102,18 +102,6 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     }
 
     private fun initVm() {
-        viewModel.viewState.observe(this, Observer { state ->
-            when (state) {
-                is State.RefreshList -> {
-                    ratesAdapter.submitList(state.rates)
-                }
-
-                is State.ShowEmptyScreen -> {
-                    // TODO: Show empty layout
-                }
-            }
-        })
-
         viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {
