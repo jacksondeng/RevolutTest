@@ -25,16 +25,31 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
         compositeDisposable.add(
             repo.pollRates(base, multiplier)
                 .subscribe({ rates ->
-                    baseRate = rates
-                    rates?.let {
-                        _state.value = State.RefreshList(it.rates)
-                    } ?: run {
-                        State.ShowEmptyScreen("Please try again later")
-                    }
+                    onSuccess(rates)
                 }, {
                     State.ShowEmptyScreen("Please try again later")
                 })
         )
+    }
+
+    fun getCachedRates(base: String, multiplier: Double) {
+        compositeDisposable.add(
+            repo.getCachedRates(base, multiplier)
+                .subscribe({ rates ->
+                    onSuccess(rates)
+                }, {
+                    State.ShowEmptyScreen("Please try again later")
+                })
+        )
+    }
+
+    private fun onSuccess(rates: Rates?) {
+        baseRate = rates
+        rates?.let {
+            _state.value = State.RefreshList(it.rates)
+        } ?: run {
+            State.ShowEmptyScreen("Please try again later")
+        }
     }
 
     fun calculateRate(multiplier: Double) {

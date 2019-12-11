@@ -12,7 +12,7 @@ import jacksondeng.revoluttest.util.TABLE_NAME_RATES
 @Dao
 interface RatesDao {
     @Query("SELECT * FROM $TABLE_NAME_RATES WHERE base = :base")
-    fun getRates(base: String): Flowable<RatesDTO>?
+    fun getRates(base: String): Flowable<RatesDTO>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun updateCache(rates: RatesDTO): Long

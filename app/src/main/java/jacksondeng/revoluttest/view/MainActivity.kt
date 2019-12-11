@@ -102,6 +102,7 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     }
 
     private fun initVm() {
+        viewModel.getCachedRates(base = "EUR", multiplier = 1.0)
         viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {

@@ -2,6 +2,7 @@ package jacksondeng.revoluttest.data.repo
 
 import android.content.SharedPreferences
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import jacksondeng.revoluttest.data.api.RatesApi
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 interface RatesRepository {
     fun pollRates(base: String, multiplier: Double = 1.0): Flowable<Rates>
+    fun getCachedRates(base: String, multiplier: Double = 1.0): Single<Rates>
 }
 
 class RatesRepositoryImpl @Inject constructor(
@@ -49,6 +51,16 @@ class RatesRepositoryImpl @Inject constructor(
                     .flatMap {
                         Flowable.just(mapToModel(it, multiplier))
                     })
+    }
+
+    override fun getCachedRates(base: String, multiplier: Double): Single<Rates> {
+        return ratesDao.getRates(base)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .firstOrError()
+            .flatMap {
+                Single.just(mapToModel(it, multiplier))
+            }
     }
 
     private fun mapToModel(dto: RatesDTO, multiplier: Double): Rates {
