@@ -1,5 +1,6 @@
 package jacksondeng.revoluttest.view.adapter
 
+import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -23,7 +24,10 @@ interface InterActionListener {
     fun getInputStream(flow: Flowable<String>)
 }
 
-class RatesAdapter(private val interActionListener: InterActionListener) :
+class RatesAdapter(
+    private val interActionListener: InterActionListener,
+    private val sharePref: SharedPreferences
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
@@ -40,7 +44,7 @@ class RatesAdapter(private val interActionListener: InterActionListener) :
                 val binding: ItemExchangeRateBinding = DataBindingUtil.inflate(
                     layoutInflater, R.layout.item_exchange_rate, parent, false
                 )
-                return ExchangeRateViewHolder(binding, interActionListener)
+                return ExchangeRateViewHolder(binding, interActionListener,sharePref)
             }
 
             else -> {

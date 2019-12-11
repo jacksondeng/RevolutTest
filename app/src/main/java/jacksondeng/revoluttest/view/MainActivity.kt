@@ -1,6 +1,7 @@
 package jacksondeng.revoluttest.view
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -11,6 +12,7 @@ import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
+import jacksondeng.revoluttest.util.getSelectedBase
 import jacksondeng.revoluttest.view.adapter.InterActionListener
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
@@ -22,6 +24,9 @@ import javax.inject.Inject
 class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     @Inject
     lateinit var viewModel: RatesViewModel
+
+    @Inject
+    lateinit var sharePref: SharedPreferences
 
     private lateinit var ratesAdapter: RatesAdapter
 
@@ -41,13 +46,12 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
             }
                 .delay(100, TimeUnit.MILLISECONDS)
                 .subscribe({
-                    println("MULTIPLY $it")
                     viewModel.pollRates(
-                        base = "EUR",
+                        base = sharePref.getSelectedBase(),
                         multiplier = it
                     )
                 }, {
-                    println("THROW $it")
+
                 })
         )
     }
@@ -55,6 +59,7 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     override fun onItemClicked(position: Int) {
         super.onItemClicked(position)
         viewModel.pausePolling()
+        viewModel.pollRates()
         ratesAdapter.moveItemToTop(position)
         ratesRv.smoothScrollToPosition(0)
     }
@@ -69,7 +74,7 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
 
     override fun onResume() {
         super.onResume()
-        viewModel.pollRates("EUR")
+        viewModel.pollRates(sharePref.getSelectedBase())
     }
 
     override fun onPause() {
@@ -89,7 +94,7 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     }
 
     private fun initAdapters() {
-        ratesAdapter = RatesAdapter(this@MainActivity)
+        ratesAdapter = RatesAdapter(this@MainActivity, sharePref)
     }
 
     private fun initRv(context: Context) {
@@ -102,7 +107,7 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     }
 
     private fun initVm() {
-        viewModel.getCachedRates(base = "EUR", multiplier = 1.0)
+        viewModel.getCachedRates(base = sharePref.getSelectedBase(), multiplier = 1.0)
         viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.RefreshList -> {

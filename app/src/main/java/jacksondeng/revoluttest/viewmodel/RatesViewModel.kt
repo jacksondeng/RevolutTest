@@ -1,5 +1,6 @@
 package jacksondeng.revoluttest.viewmodel
 
+import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,9 +9,13 @@ import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.State
+import jacksondeng.revoluttest.util.getSelectedBase
 import javax.inject.Inject
 
-class RatesViewModel @Inject constructor(private val repo: RatesRepository) : ViewModel() {
+class RatesViewModel @Inject constructor(
+    private val repo: RatesRepository,
+    private val sharePref: SharedPreferences
+) : ViewModel() {
 
     private var baseRate: Rates? = null
 
@@ -21,7 +26,10 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
 
     private var compositeDisposable = CompositeDisposable()
 
-    fun pollRates(base: String = "EUR", multiplier: Double = 1.0) {
+    fun pollRates(
+        base: String = sharePref.getSelectedBase()
+        , multiplier: Double = 1.0
+    ) {
         compositeDisposable.add(
             repo.pollRates(base, multiplier)
                 .subscribe({ rates ->

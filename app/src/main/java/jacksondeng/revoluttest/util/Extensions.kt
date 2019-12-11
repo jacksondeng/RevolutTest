@@ -1,5 +1,6 @@
 package jacksondeng.revoluttest.util
 
+import android.content.SharedPreferences
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
@@ -22,4 +23,14 @@ fun EditText.addTextWatcher(): Flowable<EditTextFlow> {
             }
         })
     }, BackpressureStrategy.BUFFER)
+}
+
+fun SharedPreferences.updateSelectedBase(base: String) {
+    this.edit()
+        .putString(TAG_SELECTED_BASE, base)
+        .apply()
+}
+
+fun SharedPreferences.getSelectedBase(): String {
+    return this.getString(TAG_SELECTED_BASE, "EUR") ?: "EUR"
 }
