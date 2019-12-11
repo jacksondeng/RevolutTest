@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import androidx.recyclerview.widget.RecyclerView
 import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
 import jacksondeng.revoluttest.model.entity.CurrencyModel
+import jacksondeng.revoluttest.util.clearLastCachedTime
 import jacksondeng.revoluttest.util.updateSelectedBase
 import jacksondeng.revoluttest.view.adapter.InterActionListener
 
@@ -18,6 +19,7 @@ class ExchangeRateViewHolder(
         binding.obj = currency
         binding.executePendingBindings()
         binding.root.setOnClickListener {
+            sharePref.clearLastCachedTime()
             sharePref.updateSelectedBase(currency.currency.currencyCode)
             interActionListener.onItemClicked(adapterPosition)
         }

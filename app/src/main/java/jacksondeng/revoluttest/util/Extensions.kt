@@ -34,3 +34,9 @@ fun SharedPreferences.updateSelectedBase(base: String) {
 fun SharedPreferences.getSelectedBase(): String {
     return this.getString(TAG_SELECTED_BASE, "EUR") ?: "EUR"
 }
+
+fun SharedPreferences.clearLastCachedTime() {
+    this.edit()
+        .putLong(TAG_LAST_CACHED_TIME, -1L)
+        .apply()
+}
