@@ -20,7 +20,8 @@ buildscript {
                 okHttp          : "3.12.0",
                 okHttpLog       : "3.11.0",
                 dagger          : "2.17",
-                room            : "2.2.2"
+                room            : "2.2.2",
+                joda            : "2.10.5"
         ]
     }
 

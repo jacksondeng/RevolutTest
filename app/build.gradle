@@ -86,4 +86,7 @@ dependencies {
     implementation "androidx.room:room-runtime:${libraries.room}"
     kapt "androidx.room:room-compiler:${libraries.room}"
     implementation "androidx.room:room-rxjava2:${libraries.room}"
+
+    // Joda
+    implementation "joda-time:joda-time:${libraries.joda}"
 }

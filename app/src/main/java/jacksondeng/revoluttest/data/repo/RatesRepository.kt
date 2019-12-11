@@ -1,7 +1,7 @@
 package jacksondeng.revoluttest.data.repo
 
 import android.content.SharedPreferences
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import jacksondeng.revoluttest.data.api.RatesApi
@@ -11,13 +11,14 @@ import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.BASE_THUMBNAIL_URL
 import jacksondeng.revoluttest.util.TAG_LAST_CACHED_TIME
+import org.joda.time.Interval
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 interface RatesRepository {
-    fun pollRates(base: String, multiplier: Double = 1.0): Observable<Rates>
+    fun pollRates(base: String, multiplier: Double = 1.0): Flowable<Rates>
 }
 
 class RatesRepositoryImpl @Inject constructor(
@@ -27,30 +28,26 @@ class RatesRepositoryImpl @Inject constructor(
 ) :
     RatesRepository {
 
-    override fun pollRates(base: String, multiplier: Double): Observable<Rates> {
+    override fun pollRates(base: String, multiplier: Double): Flowable<Rates> {
         // Prevent overlapping requests
         val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         return (
-                Observable.interval(2, TimeUnit.SECONDS)
+                Flowable.interval(2, TimeUnit.SECONDS)
                     .flatMap {
-                        Observable.concat(
-                            ratesDao.getRates("EUR"),
-                            api.pollRates(base).retry(3)
-                        )
+                        api.pollRates(base).retry(2)
+                            // Keep the stream alive by returning cache when api failed
+                            .onErrorResumeNext(
+                                ratesDao.getRates(base)
+                            )
                     }
                     .subscribeOn(scheduler)
                     .doOnNext {
-                        if (sharePref.getLong(TAG_LAST_CACHED_TIME, -1L) == -1L) {
-                            ratesDao.cache(it)
-                            sharePref.edit()
-                                .putLong(TAG_LAST_CACHED_TIME, System.currentTimeMillis())
-                                .apply()
-                        }
+                        cacheRate(it)
                     }
                     .distinctUntilChanged()
                     .observeOn(AndroidSchedulers.mainThread())
                     .flatMap {
-                        Observable.just(mapToModel(it, multiplier))
+                        Flowable.just(mapToModel(it, multiplier))
                     })
     }
 
@@ -109,7 +106,22 @@ class RatesRepositoryImpl @Inject constructor(
         return (rate * multiplier == Double.POSITIVE_INFINITY || rate * multiplier == Double.NEGATIVE_INFINITY)
     }
 
-    fun cacheRate() {
-        // TODO: Implement caching mechanism
+    private fun cacheRate(ratesDTO: RatesDTO) {
+        val lastCachedTime = sharePref.getLong(TAG_LAST_CACHED_TIME, -1L)
+        if (lastCachedTime == -1L) {
+            updateCache(ratesDTO)
+        } else {
+            val interval = Interval(lastCachedTime, System.currentTimeMillis())
+            if (interval.toDuration().standardMinutes > 5) {
+                updateCache(ratesDTO)
+            }
+        }
+    }
+
+    private fun updateCache(ratesDTO: RatesDTO) {
+        ratesDao.updateCache(ratesDTO)
+        sharePref.edit()
+            .putLong(TAG_LAST_CACHED_TIME, System.currentTimeMillis())
+            .apply()
     }
 }

@@ -29,11 +29,9 @@ class RatesViewModel @Inject constructor(private val repo: RatesRepository) : Vi
                     rates?.let {
                         _state.value = State.RefreshList(it.rates)
                     } ?: run {
-                        println("WUTT")
                         State.ShowEmptyScreen("Please try again later")
                     }
                 }, {
-                    println("THROW $it")
                     State.ShowEmptyScreen("Please try again later")
                 })
         )
