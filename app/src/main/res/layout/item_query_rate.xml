@@ -58,11 +58,13 @@
                 android:id="@+id/queryAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
                 android:layout_gravity="bottom"
-                android:textSize="16sp"
-                android:inputType="numberDecimal"
                 android:digits="0123456789."
+                android:gravity="right"
+                android:inputType="numberDecimal"
+                android:minWidth="65dp"
+                android:padding="8dp"
+                android:textSize="16sp"
                 tools:text="123.20489" />
 
 

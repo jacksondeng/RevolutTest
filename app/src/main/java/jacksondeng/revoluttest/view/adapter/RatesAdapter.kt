@@ -82,8 +82,6 @@ class RatesAdapter(
 
     private val differ = AsyncListDiffer(this, diffCallback)
 
-    fun clear() = differ.submitList(null)
-
     fun submitList(list: List<CurrencyModel>?) = differ.submitList((list))
 
     fun moveItemToTop(position: Int) {

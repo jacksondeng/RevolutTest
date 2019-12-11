@@ -28,8 +28,9 @@ class RatesViewModel @Inject constructor(
 
     fun pollRates(
         base: String = sharePref.getSelectedBase()
-        , multiplier: Double = 1.0
+        , multiplier: Double = this.multiplier
     ) {
+        this.multiplier = multiplier
         compositeDisposable.add(
             repo.pollRates(base, multiplier)
                 .subscribe({ rates ->
