@@ -89,4 +89,7 @@ dependencies {
 
     // Joda
     implementation "joda-time:joda-time:${libraries.joda}"
+
+    // ViewModel"
+    implementation "androidx.lifecycle:lifecycle-extensions:${libraries.viewmodel}"
 }

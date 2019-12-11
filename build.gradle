@@ -21,7 +21,8 @@ buildscript {
                 okHttpLog       : "3.11.0",
                 dagger          : "2.17",
                 room            : "2.2.2",
-                joda            : "2.10.5"
+                joda            : "2.10.5",
+                viewmodel       : "2.1.0"
         ]
     }
 

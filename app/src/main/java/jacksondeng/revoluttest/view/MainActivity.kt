@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -12,6 +13,7 @@ import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
+import jacksondeng.revoluttest.util.ViewModelFactory
 import jacksondeng.revoluttest.util.getSelectedBase
 import jacksondeng.revoluttest.view.adapter.InterActionListener
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
@@ -22,6 +24,8 @@ import javax.inject.Inject
 
 class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
     lateinit var viewModel: RatesViewModel
 
     @Inject
@@ -105,6 +109,7 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     }
 
     private fun initVm() {
+        viewModel = ViewModelProviders.of(this, viewModelFactory)[RatesViewModel::class.java]
         viewModel.getCachedRates(base = sharePref.getSelectedBase(), multiplier = 1.0)
         viewModel.state.observe(this, Observer { state ->
             when (state) {
