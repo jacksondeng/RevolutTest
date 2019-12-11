@@ -1,7 +1,6 @@
 package jacksondeng.revoluttest.view.viewholder
 
 import androidx.recyclerview.widget.RecyclerView
-import io.reactivex.Flowable
 import jacksondeng.revoluttest.databinding.ItemQueryRateBinding
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.util.CurrencyFormatInputFilter
@@ -15,8 +14,6 @@ class QueryRateViewHolder(
     private val interActionListener: InterActionListener
 ) :
     RecyclerView.ViewHolder(binding.root) {
-
-    lateinit var flow: Flowable<String>
 
     fun bind(currency: CurrencyModel) {
         binding.obj = currency

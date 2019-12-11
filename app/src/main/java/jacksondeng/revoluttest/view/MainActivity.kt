@@ -18,7 +18,6 @@ import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainActivity : DaggerAppCompatActivity(), InterActionListener {
@@ -44,7 +43,6 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
                 viewModel.calculateRate(multiplier)
                 Flowable.just(multiplier)
             }
-                .delay(100, TimeUnit.MILLISECONDS)
                 .subscribe({
                     viewModel.pollRates(
                         base = sharePref.getSelectedBase(),
