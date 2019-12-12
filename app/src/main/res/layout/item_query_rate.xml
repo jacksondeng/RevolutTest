@@ -61,6 +61,7 @@
                 android:layout_gravity="bottom"
                 android:digits="0123456789."
                 android:gravity="right"
+                android:imeOptions="actionDone"
                 android:inputType="numberDecimal"
                 android:minWidth="65dp"
                 android:padding="8dp"
