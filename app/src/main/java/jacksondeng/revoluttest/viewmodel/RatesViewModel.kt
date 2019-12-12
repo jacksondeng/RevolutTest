@@ -70,8 +70,6 @@ class RatesViewModel @Inject constructor(
         }
     }
 
-    fun stopPolling() = compositeDisposable.dispose()
-
     fun pausePolling() = compositeDisposable.clear()
 
     override fun onCleared() {

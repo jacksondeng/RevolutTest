@@ -87,7 +87,6 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.dispose()
-        viewModel.stopPolling()
     }
 
     private fun initViews() {
