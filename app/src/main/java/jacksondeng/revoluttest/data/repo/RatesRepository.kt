@@ -81,7 +81,7 @@ class RatesRepositoryImpl @Inject constructor(
             this.add(
                 CurrencyModel(
                     currency = Currency.getInstance(base),
-                    rate = 0.0,
+                    rate = multiplier,
                     imageUrl = getImageUrl(base)
                 )
             )

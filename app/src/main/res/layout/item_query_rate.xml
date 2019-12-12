@@ -60,11 +60,12 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:digits="0123456789."
-                android:gravity="right"
+                android:gravity="end"
                 android:imeOptions="actionDone"
                 android:inputType="numberDecimal"
                 android:minWidth="65dp"
                 android:padding="8dp"
+                android:text="@{String.valueOf(obj.rate)}"
                 android:textSize="16sp"
                 tools:text="123.20489" />
 

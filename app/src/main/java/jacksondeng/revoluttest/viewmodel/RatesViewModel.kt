@@ -41,7 +41,10 @@ class RatesViewModel @Inject constructor(
         )
     }
 
-    fun getCachedRates(base: String, multiplier: Double) {
+    fun getCachedRates(
+        base: String = sharePref.getSelectedBase(),
+        multiplier: Double = this.multiplier
+    ) {
         compositeDisposable.add(
             repo.getCachedRates(base, multiplier)
                 .subscribe({ rates ->
@@ -62,6 +65,7 @@ class RatesViewModel @Inject constructor(
     }
 
     fun calculateRate(multiplier: Double) {
+        this.multiplier = multiplier
         baseRate?.rates?.let { rates ->
             val result = rates.map {
                 CurrencyModel(it.currency, it.rate * multiplier, it.imageUrl)

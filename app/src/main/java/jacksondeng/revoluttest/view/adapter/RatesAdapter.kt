@@ -22,6 +22,8 @@ const val VIEW_TYPE_EXCHANGE_RATE = 1
 interface InterActionListener {
     fun onItemClicked(position: Int) {}
     fun getInputStream(flow: Flowable<String>)
+    fun onFocusRequested()
+    fun onFocusLost(multiplier: Double)
 }
 
 class RatesAdapter(
