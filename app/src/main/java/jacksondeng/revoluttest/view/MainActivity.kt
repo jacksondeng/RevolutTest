@@ -97,7 +97,6 @@ class MainActivity : DaggerAppCompatActivity() {
 
     private fun initVm() {
         viewModel = ViewModelProviders.of(this, viewModelFactory)[RatesViewModel::class.java]
-        viewModel.getCachedRates()
         viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.Loaded -> {

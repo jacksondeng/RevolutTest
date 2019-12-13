@@ -8,8 +8,8 @@ import javax.inject.Singleton
 
 @Module
 class RevolutAppModule {
-    @Singleton
     @Provides
+    @Singleton
     fun provideContext(application: RevolutApplication): Context {
         return application
     }

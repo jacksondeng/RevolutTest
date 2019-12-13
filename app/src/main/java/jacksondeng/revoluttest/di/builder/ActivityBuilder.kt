@@ -5,10 +5,13 @@ import dagger.android.ContributesAndroidInjector
 import jacksondeng.revoluttest.di.module.NetworkModule
 import jacksondeng.revoluttest.di.module.RatesRepositoryModule
 import jacksondeng.revoluttest.di.module.SharePrefModule
+import jacksondeng.revoluttest.model.ActivityScope
 import jacksondeng.revoluttest.util.ViewModelModule
 import jacksondeng.revoluttest.view.MainActivity
+import javax.inject.Singleton
 
 @Module
+
 abstract class ActivityBuilder {
     @ContributesAndroidInjector(
         modules = [
@@ -18,5 +21,7 @@ abstract class ActivityBuilder {
             ViewModelModule::class
         ]
     )
+    @ActivityScope
+    @Singleton
     abstract fun contributeMainActivity(): MainActivity
 }

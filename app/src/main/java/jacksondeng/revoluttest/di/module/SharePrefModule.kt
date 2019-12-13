@@ -5,12 +5,14 @@ import android.content.SharedPreferences
 import dagger.Module
 import dagger.Provides
 import jacksondeng.revoluttest.RevolutApplication
+import jacksondeng.revoluttest.model.ActivityScope
 import jacksondeng.revoluttest.util.PREF_FILE_NAME
 import javax.inject.Singleton
 
 @Module
 class SharePrefModule {
     @Provides
+    @Singleton
     fun provideSharedPreference(application: RevolutApplication): SharedPreferences {
         return application.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
     }
