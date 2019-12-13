@@ -118,12 +118,6 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
 
     fun submitList(list: List<CurrencyModel>?) = differ.submitList((list))
 
-    fun moveItemToTop(currencyModel: CurrencyModel) {
-        val list = differ.currentList.toMutableList()
-        Collections.swap(list, 0, differ.currentList.indexOf(currencyModel))
-        submitList(list)
-    }
-
     private fun createExchangeRateHolder(parent: ViewGroup): ExchangeRateViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding: ItemExchangeRateBinding = DataBindingUtil.inflate(

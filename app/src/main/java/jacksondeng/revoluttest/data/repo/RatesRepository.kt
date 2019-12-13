@@ -37,14 +37,12 @@ class RatesRepositoryImpl @Inject constructor(
         // Prevent overlapping requests
         val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         return (
-                Flowable.interval(1, TimeUnit.SECONDS)
-                    .flatMap {
-                        api.pollRates(base).retry(2)
-                            // Keep the stream alive by returning cache when api failed
-                            .onErrorResumeNext(
-                                ratesDao.getRatesStream(base)
-                            )
-                    }
+                Flowable.fromPublisher(
+                    api.pollRates(base).retry(2)
+                        // Keep the stream alive by returning cache when api failed
+                        .onErrorResumeNext(ratesDao.getRatesStream(base))
+                ).repeatWhen { flow: Flowable<Any> -> flow.delay(1, TimeUnit.SECONDS) }
+                    .onBackpressureLatest()
                     .subscribeOn(scheduler)
                     .doOnNext {
                         cacheRate(it)
