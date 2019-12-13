@@ -46,5 +46,10 @@ fun ViewGroup.inflate(layoutId: Int, attachToRoot: Boolean = false): View =
 
 fun LottieAnimationView.stopAndHide() {
     this.gone()
-    this
+    this.pauseAnimation()
+}
+
+fun LottieAnimationView.showAndPlay() {
+    this.visible()
+    this.playAnimation()
 }

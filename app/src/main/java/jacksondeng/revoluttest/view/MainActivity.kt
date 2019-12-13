@@ -22,7 +22,7 @@ class MainActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
-    lateinit var viewModel: RatesViewModel
+    private lateinit var viewModel: RatesViewModel
 
     @Inject
     lateinit var sharePref: SharedPreferences
@@ -108,7 +108,7 @@ class MainActivity : DaggerAppCompatActivity() {
                 is State.Loading -> {
                     viewModel.pollRates()
                     ratesRv.gone()
-                    loader.visible()
+                    loader.showAndPlay()
                 }
 
                 is State.RefreshList -> {

@@ -47,22 +47,24 @@ class RatesViewModel @Inject constructor(
         baseChanged: Boolean = false
     ) {
         this.multiplier = multiplier
-        compositeDisposable.add(
-            repo.getCachedRates(base, multiplier)
-                .subscribe({ rates ->
-                    rates?.let {
-                        if (baseChanged) {
-                            _state.value = State.RefreshList(it.rates)
-                        } else {
-                            _state.value = State.Calculated(it.rates)
+        if (compositeDisposable.size() == 0) {
+            compositeDisposable.add(
+                repo.getCachedRates(base, multiplier)
+                    .subscribe({ rates ->
+                        rates?.let {
+                            if (baseChanged) {
+                                _state.value = State.RefreshList(it.rates)
+                            } else {
+                                _state.value = State.Calculated(it.rates)
+                            }
+                        } ?: run {
+                            _state.value = State.Loading()
                         }
-                    } ?: run {
+                    }, {
                         _state.value = State.Loading()
-                    }
-                }, {
-                    _state.value = State.Loading()
-                })
-        )
+                    })
+            )
+        }
     }
 
     fun pausePolling() = compositeDisposable.clear()
