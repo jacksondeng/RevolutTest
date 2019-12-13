@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">RevolutTest</string>
     <string name="action_settings">Settings</string>
-    <string name="string_try_again">Please try again later</string>
+    <string name="string_try_again">Try again</string>
     <string name="string_caculation_overflowed">Too long to display</string>
     <string name="string_loading">Loading</string>
 </resources>

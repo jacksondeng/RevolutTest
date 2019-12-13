@@ -39,14 +39,14 @@ class RatesRepositoryImpl @Inject constructor(
         return (
                 Flowable.fromPublisher(
                     api.pollRates(base).retry(2)
-                        // Keep the stream alive by returning cache when api failed
-                        .onErrorResumeNext(ratesDao.getRatesStream(base))
+                        .doOnNext {
+                            cacheRate(it)
+                        }
+                        .onErrorResumeNext(ratesDao.getCachedRates(base).toFlowable())
+
                 ).repeatWhen { flow: Flowable<Any> -> flow.delay(1, TimeUnit.SECONDS) }
                     .onBackpressureLatest()
                     .subscribeOn(scheduler)
-                    .doOnNext {
-                        cacheRate(it)
-                    }
                     .distinctUntilChanged()
                     .observeOn(AndroidSchedulers.mainThread())
                     .flatMap {

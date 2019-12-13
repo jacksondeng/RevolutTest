@@ -8,14 +8,17 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.jakewharton.rxbinding2.view.RxView
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.R
+import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.util.*
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainActivity : DaggerAppCompatActivity() {
@@ -57,6 +60,10 @@ class MainActivity : DaggerAppCompatActivity() {
     private fun initViews() {
         initAdapters()
         initRv(this@MainActivity)
+        RxView.clicks(emptyLayout)
+            .throttleFirst(300, TimeUnit.MILLISECONDS)
+            .map { viewModel.retry() }
+            .subscribe()
     }
 
     private fun initAdapters() {
@@ -94,27 +101,23 @@ class MainActivity : DaggerAppCompatActivity() {
         viewModel.state.observe(this, Observer { state ->
             when (state) {
                 is State.Loaded -> {
-                    ratesAdapter.submitList(state.rates)
-                    ratesRv.visible()
-                    loader.stopAndHide()
+                    showList(state.rates)
                 }
 
                 is State.Calculated -> {
-                    ratesAdapter.submitList(state.rates)
-                    ratesRv.visible()
-                    loader.stopAndHide()
+                    viewModel.pausePolling()
+                    showList(state.rates)
                 }
 
                 is State.Loading -> {
                     viewModel.pollRates()
                     ratesRv.gone()
                     loader.showAndPlay()
+                    emptyLayout.gone()
                 }
 
                 is State.RefreshList -> {
-                    ratesAdapter.submitList(state.rates)
-                    ratesRv.visible()
-                    loader.stopAndHide()
+                    showList(state.rates)
                     ratesRv.post {
                         ratesRv.smoothScrollToPosition(0)
                         viewModel.pausePolling()
@@ -123,9 +126,18 @@ class MainActivity : DaggerAppCompatActivity() {
                 }
 
                 is State.Error -> {
-                    // TODO: Show empty layout
+                    emptyLayout.visible()
+                    ratesRv.gone()
+                    loader.gone()
                 }
             }
         })
+    }
+
+    private fun showList(rates: List<CurrencyModel>) {
+        ratesAdapter.submitList(rates)
+        ratesRv.visible()
+        loader.stopAndHide()
+        emptyLayout.gone()
     }
 }
