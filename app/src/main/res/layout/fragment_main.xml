@@ -4,6 +4,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         tools:context=".view.MainActivityFragment"
         tools:showIn="@layout/activity_main">
 
@@ -14,7 +16,7 @@
             android:layout_centerInParent="true"
             app:lottie_autoPlay="true"
             app:lottie_fileName="loader.json"
-            app:lottie_loop="true"/>
+            app:lottie_loop="true" />
 
     <include
             android:id="@+id/emptyLayout"
@@ -22,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/ratesRv"
