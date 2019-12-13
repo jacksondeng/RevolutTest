@@ -3,50 +3,87 @@ package jacksondeng.revoluttest.view.adapter
 import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.rxbinding2.view.RxView
+import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.Flowable
+import io.reactivex.subjects.PublishSubject
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
 import jacksondeng.revoluttest.databinding.ItemQueryRateBinding
 import jacksondeng.revoluttest.model.entity.CurrencyModel
+import jacksondeng.revoluttest.util.CURRENCY_PATTERN
+import jacksondeng.revoluttest.util.clearLastCachedTime
+import jacksondeng.revoluttest.util.hideKeyBoard
+import jacksondeng.revoluttest.util.updateSelectedBase
 import jacksondeng.revoluttest.view.viewholder.ExchangeRateViewHolder
 import jacksondeng.revoluttest.view.viewholder.QueryRateViewHolder
+import java.text.DecimalFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 const val VIEW_TYPE_QUERY_RATE = 0
 const val VIEW_TYPE_EXCHANGE_RATE = 1
 
 interface InterActionListener {
-    fun onItemClicked(position: Int) {}
     fun getInputStream(flow: Flowable<String>)
-    fun onFocusRequested()
-    fun onFocusLost(multiplier: Double)
 }
 
-class RatesAdapter(
-    private val interActionListener: InterActionListener,
-    private val sharePref: SharedPreferences
-) :
+class RatesAdapter(private val sharePref: SharedPreferences) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    val clickSubject = PublishSubject.create<Int>()
+    val textChangeSubject = PublishSubject.create<Double>()
+    val focusChangesSubject = PublishSubject.create<Boolean>()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
             VIEW_TYPE_QUERY_RATE -> {
-                val layoutInflater = LayoutInflater.from(parent.context)
-                val binding: ItemQueryRateBinding = DataBindingUtil.inflate(
-                    layoutInflater, R.layout.item_query_rate, parent, false
-                )
-                return QueryRateViewHolder(binding, interActionListener)
+                val holder = createQueryRateHolder(parent)
+                RxView.focusChanges(holder.binding.queryAmount)
+                    .skipInitialValue()
+                    .subscribe(focusChangesSubject)
+
+                RxTextView
+                    .editorActions(holder.binding.queryAmount)
+                    .filter { it in arrayOf(EditorInfo.IME_ACTION_DONE, it == EditorInfo.IME_NULL) }
+                    .subscribe {
+                        holder.binding.queryAmount.clearFocus()
+                        parent.hideKeyBoard()
+                    }
+
+                RxTextView
+                    .textChanges(holder.binding.queryAmount)
+                    .debounce(300, TimeUnit.MILLISECONDS)
+                    .map {
+                        if (it.isEmpty()) {
+                            1.0
+                        } else {
+                            val rate = it.toString().toDouble()
+                            DecimalFormat(CURRENCY_PATTERN).format(rate).toString().toDouble()
+                        }
+                    }
+                    .subscribe(textChangeSubject)
+
+                return holder
             }
 
             VIEW_TYPE_EXCHANGE_RATE -> {
-                val layoutInflater = LayoutInflater.from(parent.context)
-                val binding: ItemExchangeRateBinding = DataBindingUtil.inflate(
-                    layoutInflater, R.layout.item_exchange_rate, parent, false
-                )
-                return ExchangeRateViewHolder(binding, interActionListener,sharePref)
+                val holder = createExchangeRateHolder(parent)
+                RxView.clicks(holder.binding.root)
+                    .takeUntil(RxView.detaches(parent))
+                    .map<Int> {
+                        sharePref.clearLastCachedTime()
+                        sharePref.updateSelectedBase(differ.currentList[holder.adapterPosition].currency.currencyCode)
+                        holder.adapterPosition
+                    }
+                    .subscribe(clickSubject)
+
+                return holder
             }
 
             else -> {
@@ -78,7 +115,7 @@ class RatesAdapter(
         }
 
         override fun areContentsTheSame(oldItem: CurrencyModel, newItem: CurrencyModel): Boolean {
-            return oldItem.currency.currencyCode == newItem.currency.currencyCode && oldItem.rate == newItem.rate
+            return oldItem.currency.currencyCode == newItem.currency.currencyCode && oldItem.rate.toString() == newItem.rate.toString()
         }
     }
 
@@ -90,5 +127,21 @@ class RatesAdapter(
         val list = differ.currentList.toMutableList()
         Collections.swap(list, 0, position)
         submitList(list)
+    }
+
+    private fun createExchangeRateHolder(parent: ViewGroup): ExchangeRateViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding: ItemExchangeRateBinding = DataBindingUtil.inflate(
+            layoutInflater, R.layout.item_exchange_rate, parent, false
+        )
+        return ExchangeRateViewHolder(binding)
+    }
+
+    private fun createQueryRateHolder(parent: ViewGroup): QueryRateViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding: ItemQueryRateBinding = DataBindingUtil.inflate(
+            layoutInflater, R.layout.item_query_rate, parent, false
+        )
+        return QueryRateViewHolder(binding)
     }
 }

@@ -9,19 +9,17 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import dagger.android.support.DaggerAppCompatActivity
-import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.util.State
 import jacksondeng.revoluttest.util.ViewModelFactory
-import jacksondeng.revoluttest.view.adapter.InterActionListener
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.*
 import javax.inject.Inject
 
-class MainActivity : DaggerAppCompatActivity(), InterActionListener {
+class MainActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
 
@@ -33,40 +31,6 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     private lateinit var ratesAdapter: RatesAdapter
 
     private val compositeDisposable = CompositeDisposable()
-
-    override fun getInputStream(flow: Flowable<String>) {
-        compositeDisposable.add(
-            flow.flatMap {
-                val multiplier = if (it.isNotEmpty()) {
-                    it.toDouble()
-                } else {
-                    1.0
-                }
-                viewModel.pausePolling()
-                Flowable.just(multiplier)
-            }
-                .subscribe({
-                    viewModel.calculateRate(it)
-                }, {
-
-                })
-        )
-    }
-
-    override fun onItemClicked(position: Int) {
-        viewModel.pausePolling()
-        viewModel.pollRates()
-        ratesAdapter.moveItemToTop(position)
-        ratesRv.smoothScrollToPosition(0)
-    }
-
-    override fun onFocusRequested() {
-        viewModel.pausePolling()
-    }
-
-    override fun onFocusLost(multiplier: Double) {
-        viewModel.pollRates(multiplier = multiplier)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +61,25 @@ class MainActivity : DaggerAppCompatActivity(), InterActionListener {
     }
 
     private fun initAdapters() {
-        ratesAdapter = RatesAdapter(this@MainActivity, sharePref)
+        ratesAdapter = RatesAdapter(sharePref)
+        compositeDisposable.add(ratesAdapter.clickSubject.subscribe {
+            viewModel.pausePolling()
+            viewModel.pollRates()
+            ratesAdapter.moveItemToTop(it)
+            ratesRv.smoothScrollToPosition(0)
+        })
+
+        compositeDisposable.add(ratesAdapter.textChangeSubject.subscribe {
+            viewModel.calculateRate(it)
+        })
+
+        compositeDisposable.add(ratesAdapter.focusChangesSubject.subscribe { hasFocus ->
+            if (hasFocus) {
+                viewModel.pausePolling()
+            } else {
+                viewModel.pollRates()
+            }
+        })
     }
 
     private fun initRv(context: Context) {

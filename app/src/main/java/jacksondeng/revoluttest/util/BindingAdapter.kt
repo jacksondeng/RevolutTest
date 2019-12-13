@@ -11,6 +11,8 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import jacksondeng.revoluttest.R
+import java.text.DecimalFormat
+
 
 @BindingAdapter("bind:imageUrl")
 fun loadImage(view: ImageView, imageUrl: String) {
@@ -35,8 +37,10 @@ fun loadImage(view: ImageView, imageUrl: String) {
 @BindingAdapter("bind:showRate")
 fun showRate(view: TextView, rate: Double) {
     if (rate == Double.POSITIVE_INFINITY) {
-        view.text = view.context.getString(R.string.string_caculation_overflowed)
+        view.text =
+            view.context.getString(jacksondeng.revoluttest.R.string.string_caculation_overflowed)
     } else {
-        view.text = rate.toString()
+        view.text = DecimalFormat(CURRENCY_PATTERN).format(rate).toString()
     }
 }
+

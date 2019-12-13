@@ -92,4 +92,7 @@ dependencies {
 
     // ViewModel"
     implementation "androidx.lifecycle:lifecycle-extensions:${libraries.viewmodel}"
+
+    // RxBinding
+    implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
 }

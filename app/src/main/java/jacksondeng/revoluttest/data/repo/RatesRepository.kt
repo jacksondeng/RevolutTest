@@ -30,11 +30,14 @@ class RatesRepositoryImpl @Inject constructor(
 ) :
     RatesRepository {
 
-    override fun pollRates(base: String, multiplier: Double): Flowable<Rates> {
+    override fun pollRates(
+        base: String,
+        multiplier: Double
+    ): Flowable<Rates> {
         // Prevent overlapping requests
         val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         return (
-                Flowable.interval(2, TimeUnit.SECONDS)
+                Flowable.interval(1, TimeUnit.SECONDS)
                     .flatMap {
                         api.pollRates(base).retry(2)
                             // Keep the stream alive by returning cache when api failed

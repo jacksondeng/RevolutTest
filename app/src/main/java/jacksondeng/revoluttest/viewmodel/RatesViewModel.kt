@@ -56,8 +56,8 @@ class RatesViewModel @Inject constructor(
     }
 
     private fun onSuccess(rates: Rates?) {
-        baseRate = rates
         rates?.let {
+            baseRate = it
             _state.value = State.RefreshList(it.rates)
         } ?: run {
             State.ShowEmptyScreen("Please try again later")
@@ -67,8 +67,14 @@ class RatesViewModel @Inject constructor(
     fun calculateRate(multiplier: Double) {
         this.multiplier = multiplier
         baseRate?.rates?.let { rates ->
-            val result = rates.map {
-                CurrencyModel(it.currency, it.rate * multiplier, it.imageUrl)
+            val result = rates.mapIndexed { index, it ->
+                CurrencyModel(
+                    it.currency, if (index != 0) {
+                        it.rate * multiplier
+                    } else {
+                        it.rate
+                    }, it.imageUrl
+                )
             }
             _state.postValue(State.RefreshList(result))
         }
