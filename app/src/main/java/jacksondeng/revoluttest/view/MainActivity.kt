@@ -11,8 +11,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import dagger.android.support.DaggerAppCompatActivity
 import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.R
-import jacksondeng.revoluttest.util.State
-import jacksondeng.revoluttest.util.ViewModelFactory
+import jacksondeng.revoluttest.util.*
 import jacksondeng.revoluttest.view.adapter.RatesAdapter
 import jacksondeng.revoluttest.viewmodel.RatesViewModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -64,13 +63,11 @@ class MainActivity : DaggerAppCompatActivity() {
         ratesAdapter = RatesAdapter(sharePref)
         compositeDisposable.add(ratesAdapter.clickSubject.subscribe {
             viewModel.pausePolling()
-            viewModel.pollRates()
-            ratesAdapter.moveItemToTop(it)
-            ratesRv.smoothScrollToPosition(0)
+            viewModel.getCachedRates(multiplier = it.rate)
         })
 
         compositeDisposable.add(ratesAdapter.textChangeSubject.subscribe {
-            viewModel.calculateRate(it)
+            viewModel.getCachedRates(multiplier = it)
         })
 
         compositeDisposable.add(ratesAdapter.focusChangesSubject.subscribe { hasFocus ->
@@ -96,11 +93,30 @@ class MainActivity : DaggerAppCompatActivity() {
         viewModel.getCachedRates()
         viewModel.state.observe(this, Observer { state ->
             when (state) {
-                is State.RefreshList -> {
+                is State.Loaded -> {
                     ratesAdapter.submitList(state.rates)
+                    ratesRv.visible()
+                    loader.stopAndHide()
                 }
 
-                is State.ShowEmptyScreen -> {
+                is State.Calculated -> {
+                    ratesAdapter.submitList(state.rates)
+                    ratesRv.post {
+                        ratesRv.smoothScrollToPosition(0)
+                        viewModel.pausePolling()
+                        viewModel.pollRates()
+                    }
+                    ratesRv.visible()
+                    loader.stopAndHide()
+                }
+
+                is State.Loading -> {
+                    viewModel.pollRates()
+                    ratesRv.gone()
+                    loader.visible()
+                }
+
+                is State.Error -> {
                     // TODO: Show empty layout
                 }
             }

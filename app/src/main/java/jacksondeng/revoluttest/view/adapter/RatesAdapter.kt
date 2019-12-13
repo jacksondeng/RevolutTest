@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxTextView
-import io.reactivex.Flowable
 import io.reactivex.subjects.PublishSubject
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
@@ -29,14 +28,10 @@ import java.util.concurrent.TimeUnit
 const val VIEW_TYPE_QUERY_RATE = 0
 const val VIEW_TYPE_EXCHANGE_RATE = 1
 
-interface InterActionListener {
-    fun getInputStream(flow: Flowable<String>)
-}
-
 class RatesAdapter(private val sharePref: SharedPreferences) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val clickSubject = PublishSubject.create<Int>()
+    val clickSubject = PublishSubject.create<CurrencyModel>()
     val textChangeSubject = PublishSubject.create<Double>()
     val focusChangesSubject = PublishSubject.create<Boolean>()
 
@@ -76,10 +71,10 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
                 val holder = createExchangeRateHolder(parent)
                 RxView.clicks(holder.binding.root)
                     .takeUntil(RxView.detaches(parent))
-                    .map<Int> {
+                    .map<CurrencyModel> {
                         sharePref.clearLastCachedTime()
                         sharePref.updateSelectedBase(differ.currentList[holder.adapterPosition].currency.currencyCode)
-                        holder.adapterPosition
+                        differ.currentList[holder.adapterPosition]
                     }
                     .subscribe(clickSubject)
 
@@ -123,9 +118,9 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
 
     fun submitList(list: List<CurrencyModel>?) = differ.submitList((list))
 
-    fun moveItemToTop(position: Int) {
+    fun moveItemToTop(currencyModel: CurrencyModel) {
         val list = differ.currentList.toMutableList()
-        Collections.swap(list, 0, position)
+        Collections.swap(list, 0, differ.currentList.indexOf(currencyModel))
         submitList(list)
     }
 

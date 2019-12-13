@@ -42,7 +42,7 @@ class RatesRepositoryImpl @Inject constructor(
                         api.pollRates(base).retry(2)
                             // Keep the stream alive by returning cache when api failed
                             .onErrorResumeNext(
-                                ratesDao.getRates(base)
+                                ratesDao.getRatesStream(base)
                             )
                     }
                     .subscribeOn(scheduler)
@@ -57,20 +57,18 @@ class RatesRepositoryImpl @Inject constructor(
     }
 
     override fun getCachedRates(base: String, multiplier: Double): Single<Rates> {
-        return ratesDao.getRates(base)
+        return ratesDao.getCachedRates(base)
             .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
-            .firstOrError()
-            .flatMap {
-                Single.just(mapToModel(it, multiplier))
+            .map {
+                (mapToModel(it, multiplier))
             }
     }
 
     private fun mapToModel(dto: RatesDTO, multiplier: Double): Rates {
         return Rates(
             dto.base,
-            generateCurrencies(dto.base, multiplier, dto.rates),
-            generateCurrencies(dto.base, 1.0, dto.rates)
+            generateCurrencies(dto.base, multiplier, dto.rates)
         )
     }
 
