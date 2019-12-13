@@ -67,7 +67,11 @@ class RatesRepositoryImpl @Inject constructor(
     }
 
     private fun mapToModel(dto: RatesDTO, multiplier: Double): Rates {
-        return Rates(dto.base, generateCurrencies(dto.base, multiplier, dto.rates))
+        return Rates(
+            dto.base,
+            generateCurrencies(dto.base, multiplier, dto.rates),
+            generateCurrencies(dto.base, 1.0, dto.rates)
+        )
     }
 
     private fun getImageUrl(countryCode: String): String {

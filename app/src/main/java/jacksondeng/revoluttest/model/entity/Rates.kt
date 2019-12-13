@@ -2,5 +2,6 @@ package jacksondeng.revoluttest.model.entity
 
 data class Rates(
     val base: String,
-    val rates: List<CurrencyModel>
+    val rates: List<CurrencyModel>,
+    val baseRates: List<CurrencyModel>
 )

@@ -17,7 +17,7 @@ class RatesViewModel @Inject constructor(
     private val sharePref: SharedPreferences
 ) : ViewModel() {
 
-    private var baseRate: Rates? = null
+    private var cachedRates: Rates? = null
 
     private var _state = MutableLiveData<State>()
     val state: LiveData<State> = _state
@@ -57,7 +57,7 @@ class RatesViewModel @Inject constructor(
 
     private fun onSuccess(rates: Rates?) {
         rates?.let {
-            baseRate = it
+            cachedRates = it
             _state.value = State.RefreshList(it.rates)
         } ?: run {
             State.ShowEmptyScreen("Please try again later")
@@ -66,14 +66,10 @@ class RatesViewModel @Inject constructor(
 
     fun calculateRate(multiplier: Double) {
         this.multiplier = multiplier
-        baseRate?.rates?.let { rates ->
-            val result = rates.mapIndexed { index, it ->
+        cachedRates?.baseRates?.let { rates ->
+            val result = rates.map {
                 CurrencyModel(
-                    it.currency, if (index != 0) {
-                        it.rate * multiplier
-                    } else {
-                        it.rate
-                    }, it.imageUrl
+                    it.currency, it.rate * multiplier, it.imageUrl
                 )
             }
             _state.postValue(State.RefreshList(result))
