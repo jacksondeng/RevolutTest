@@ -63,7 +63,7 @@ class MainActivity : DaggerAppCompatActivity() {
         ratesAdapter = RatesAdapter(sharePref)
         compositeDisposable.add(ratesAdapter.clickSubject.subscribe {
             viewModel.pausePolling()
-            viewModel.getCachedRates(multiplier = it.rate)
+            viewModel.getCachedRates(multiplier = it.rate, baseChanged = true)
         })
 
         compositeDisposable.add(ratesAdapter.textChangeSubject.subscribe {
@@ -101,11 +101,6 @@ class MainActivity : DaggerAppCompatActivity() {
 
                 is State.Calculated -> {
                     ratesAdapter.submitList(state.rates)
-                    ratesRv.post {
-                        ratesRv.smoothScrollToPosition(0)
-                        viewModel.pausePolling()
-                        viewModel.pollRates()
-                    }
                     ratesRv.visible()
                     loader.stopAndHide()
                 }
@@ -114,6 +109,17 @@ class MainActivity : DaggerAppCompatActivity() {
                     viewModel.pollRates()
                     ratesRv.gone()
                     loader.visible()
+                }
+
+                is State.RefreshList -> {
+                    ratesAdapter.submitList(state.rates)
+                    ratesRv.visible()
+                    loader.stopAndHide()
+                    ratesRv.post {
+                        ratesRv.smoothScrollToPosition(0)
+                        viewModel.pausePolling()
+                        viewModel.pollRates()
+                    }
                 }
 
                 is State.Error -> {

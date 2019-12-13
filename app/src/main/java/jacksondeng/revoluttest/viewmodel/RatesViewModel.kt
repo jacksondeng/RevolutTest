@@ -43,14 +43,19 @@ class RatesViewModel @Inject constructor(
 
     fun getCachedRates(
         base: String = sharePref.getSelectedBase(),
-        multiplier: Double = this.multiplier
+        multiplier: Double = this.multiplier,
+        baseChanged: Boolean = false
     ) {
         this.multiplier = multiplier
         compositeDisposable.add(
             repo.getCachedRates(base, multiplier)
                 .subscribe({ rates ->
                     rates?.let {
-                        _state.value = State.Calculated(it.rates)
+                        if (baseChanged) {
+                            _state.value = State.RefreshList(it.rates)
+                        } else {
+                            _state.value = State.Calculated(it.rates)
+                        }
                     } ?: run {
                         _state.value = State.Loading()
                     }
