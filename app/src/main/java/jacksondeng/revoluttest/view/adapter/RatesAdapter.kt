@@ -2,6 +2,7 @@ package jacksondeng.revoluttest.view.adapter
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -12,14 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.subjects.PublishSubject
+import jacksondeng.revoluttest.BuildConfig
 import jacksondeng.revoluttest.R
 import jacksondeng.revoluttest.databinding.ItemExchangeRateBinding
 import jacksondeng.revoluttest.databinding.ItemQueryRateBinding
 import jacksondeng.revoluttest.model.entity.CurrencyModel
-import jacksondeng.revoluttest.util.CURRENCY_PATTERN
-import jacksondeng.revoluttest.util.clearLastCachedTime
-import jacksondeng.revoluttest.util.hideKeyBoard
-import jacksondeng.revoluttest.util.updateSelectedBase
+import jacksondeng.revoluttest.util.*
 import jacksondeng.revoluttest.view.viewholder.ExchangeRateViewHolder
 import jacksondeng.revoluttest.view.viewholder.QueryRateViewHolder
 import java.text.DecimalFormat
@@ -115,12 +114,17 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
         RxTextView
             .editorActions(holder.binding.queryAmount)
             .filter { it in arrayOf(EditorInfo.IME_ACTION_DONE, it == EditorInfo.IME_NULL) }
-            .subscribe {
+            .subscribe({
                 holder.binding.queryAmount.clearFocus()
                 parent.hideKeyBoard()
-            }
+            }, {
+                if (BuildConfig.DEBUG) {
+                    Log.e("Crash", it.toString())
+                }
+            })
     }
 
+    @SuppressLint("CheckResult")
     private fun subscribeToTextChangesEvent(holder: QueryRateViewHolder) {
         RxTextView
             .textChanges(holder.binding.queryAmount)
@@ -129,8 +133,19 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
                 if (it.isEmpty()) {
                     1.0
                 } else {
-                    val rate = it.toString().toDouble()
-                    DecimalFormat(CURRENCY_PATTERN).format(rate).toString().toDouble()
+                    try {
+                        val rate = it.toString().toDouble()
+                        if (rate.checkForOverflow()) {
+                            DecimalFormat(CURRENCY_PATTERN).format(1.0).toString().toDouble()
+                        } else {
+                            DecimalFormat(CURRENCY_PATTERN).format(rate).toString().toDouble()
+                        }
+                    } catch (exception: NumberFormatException) {
+                        if (BuildConfig.DEBUG) {
+                            Log.e("InvalidNumber", it.toString())
+                        }
+                        1.0
+                    }
                 }
             }
             .subscribe(textChangeSubject)

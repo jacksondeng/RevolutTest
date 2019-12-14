@@ -36,9 +36,8 @@ fun loadImage(view: ImageView, imageUrl: String) {
 
 @BindingAdapter("bind:showRate")
 fun showRate(view: TextView, rate: Double) {
-    if (rate == Double.POSITIVE_INFINITY) {
-        view.text =
-            view.context.getString(jacksondeng.revoluttest.R.string.string_caculation_overflowed)
+    if (rate == Double.POSITIVE_INFINITY || rate == Double.NEGATIVE_INFINITY) {
+        view.text = view.context.getString(R.string.string_caculation_overflowed)
     } else {
         view.text = DecimalFormat(CURRENCY_PATTERN).format(rate).toString()
     }

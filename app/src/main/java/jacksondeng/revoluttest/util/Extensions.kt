@@ -66,3 +66,7 @@ fun Activity.hideSoftKeyboard() {
 }
 
 
+fun Double.checkForOverflow(multiplier: Double = 1.0): Boolean {
+    return (this * multiplier == Double.POSITIVE_INFINITY || this * multiplier == Double.NEGATIVE_INFINITY)
+}
+
