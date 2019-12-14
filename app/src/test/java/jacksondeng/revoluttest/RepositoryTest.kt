@@ -1,34 +1,53 @@
 package jacksondeng.revoluttest
 
+import android.accounts.NetworkErrorException
+import android.content.SharedPreferences
+import io.mockk.every
 import io.mockk.mockk
+import io.reactivex.Flowable
+import io.reactivex.Single
+import io.reactivex.android.plugins.RxAndroidPlugins
+import io.reactivex.plugins.RxJavaPlugins
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.TestScheduler
 import jacksondeng.revoluttest.data.api.RatesApi
+import jacksondeng.revoluttest.data.cache.dao.RatesDao
 import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
+import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import jacksondeng.revoluttest.model.entity.Rates
+import jacksondeng.revoluttest.util.BASE_THUMBNAIL_URL
+import jacksondeng.revoluttest.util.TAG_LAST_CACHED_TIME
+import jacksondeng.revoluttest.util.TrampolineSchedulerProvider
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.util.*
+import java.util.concurrent.TimeUnit
 
-
-@ExperimentalCoroutinesApi
 class RepositoryTest {
 
     private val api = mockk<RatesApi>()
 
-    private val cachedRates = mockk<CachedRates>()
+    private val ratesDao = mockk<RatesDao>(relaxed = true)
+
+    private val sharePref = mockk<SharedPreferences>(relaxed = true)
 
     lateinit var repo: RatesRepositoryImpl
 
     @Before
     internal fun setUp() {
-        repo = RatesRepositoryImpl(api, cachedRates)
+        repo = RatesRepositoryImpl(api, ratesDao, sharePref)
+        RxJavaPlugins.reset()
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler {
+            Schedulers.trampoline()
+        }
     }
 
     @After
     fun teardown() {
-
+        RxJavaPlugins.reset()
     }
 
     @Test
@@ -44,7 +63,7 @@ class RepositoryTest {
         val resultList = listOf(
             CurrencyModel(
                 Currency.getInstance("EUR"),
-                0.0,
+                1.0,
                 "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
             ),
             CurrencyModel(
@@ -76,7 +95,7 @@ class RepositoryTest {
     }
 
     @Test
-    internal fun `poll rates with multiplier test`() {
+    internal fun `generate currencies with multiplier test`() {
         val dummyData = mapOf(
             Pair("EUR", 123.123),
             Pair("USD", 123.004),
@@ -88,7 +107,7 @@ class RepositoryTest {
         val resultList = listOf(
             CurrencyModel(
                 Currency.getInstance("EUR"),
-                0.0,
+                1.12,
                 "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
             ),
             CurrencyModel(
@@ -130,7 +149,7 @@ class RepositoryTest {
         val resultList = listOf(
             CurrencyModel(
                 Currency.getInstance("EUR"),
-                0.0,
+                1.0,
                 "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
             ),
             CurrencyModel(
@@ -157,7 +176,7 @@ class RepositoryTest {
         val resultList = listOf(
             CurrencyModel(
                 Currency.getInstance("EUR"),
-                0.0,
+                1000000.0,
                 "https://raw.githubusercontent.com/transferwise/currency-flags/master/src/flags/eur.png"
             )
         )
@@ -200,5 +219,157 @@ class RepositoryTest {
             repo.getCalculatedExchangeRate(100000000000000000000000000.120480, 2.0),
             0.000000001
         )
+    }
+
+
+    @Test
+    internal fun `api success test `() {
+        every { api.pollRates("EUR") } returns Flowable.just(
+            RatesDTO(
+                base = "EUR",
+                date = "2018-09-12",
+                rates = mapOf(
+                    "USD" to 203.4,
+                    "TWD" to 110.0
+                )
+            )
+        )
+
+        every { sharePref.getLong(TAG_LAST_CACHED_TIME, -1) } returns 1234
+
+        every { ratesDao.getCachedRates("EUR") } returns Single.just(
+            RatesDTO(
+                base = "EUR",
+                date = "2018-09-12",
+                rates = mapOf(
+                    "USD" to 123.4,
+                    "TWD" to 321.0
+                )
+            )
+        )
+
+        val subscriber = repo.pollRates("EUR", 1.0, TrampolineSchedulerProvider())
+            .test()
+            .assertValue(
+                Rates(
+                    base = "EUR",
+                    rates = listOf(
+                        CurrencyModel(
+                            currency = Currency.getInstance("EUR"),
+                            rate = 1.0,
+                            imageUrl = "${BASE_THUMBNAIL_URL}eur.png"
+                        ),
+                        CurrencyModel(
+                            currency = Currency.getInstance("USD"),
+                            rate = 203.4,
+                            imageUrl = "${BASE_THUMBNAIL_URL}usd.png"
+                        ),
+                        CurrencyModel(
+                            currency = Currency.getInstance("TWD"),
+                            rate = 110.0,
+                            imageUrl = "${BASE_THUMBNAIL_URL}twd.png"
+                        )
+                    )
+                )
+            )
+
+        subscriber.dispose()
+    }
+
+    @Test
+    internal fun `api failed cache has value test `() {
+        every { api.pollRates("EUR") } returns Flowable.error(NetworkErrorException())
+
+        every { ratesDao.getCachedRates("EUR") } returns Single.just(
+            RatesDTO(
+                base = "EUR",
+                date = "2018-09-12",
+                rates = mapOf(
+                    "USD" to 123.4,
+                    "TWD" to 321.0
+                )
+            )
+        )
+
+        val subscriber = repo.pollRates("EUR", 1.0, TrampolineSchedulerProvider())
+            .test()
+            .assertValue(
+                Rates(
+                    base = "EUR",
+                    rates = listOf(
+                        CurrencyModel(
+                            currency = Currency.getInstance("EUR"),
+                            rate = 1.0,
+                            imageUrl = "${BASE_THUMBNAIL_URL}eur.png"
+                        ),
+                        CurrencyModel(
+                            currency = Currency.getInstance("USD"),
+                            rate = 123.4,
+                            imageUrl = "${BASE_THUMBNAIL_URL}usd.png"
+                        ),
+                        CurrencyModel(
+                            currency = Currency.getInstance("TWD"),
+                            rate = 321.0,
+                            imageUrl = "${BASE_THUMBNAIL_URL}twd.png"
+                        )
+                    )
+                )
+            )
+
+        subscriber.dispose()
+    }
+
+    @Test
+    internal fun `api failed cache doesn't have value test `() {
+        every { api.pollRates("EUR") } returns Flowable.error(NetworkErrorException())
+
+        every { sharePref.getLong(TAG_LAST_CACHED_TIME, -1) } returns 1012
+
+        every { ratesDao.getCachedRates("EUR") } returns Single.error(RuntimeException())
+
+        val subscriber = repo.pollRates("EUR", 1.0, TrampolineSchedulerProvider())
+            .test()
+            .assertError {
+                println(it)
+                it is RuntimeException
+            }
+            .assertNoValues()
+            .assertTerminated()
+
+        subscriber.dispose()
+    }
+
+    @Test
+    internal fun `api scheduling test `() {
+
+        val testScheduler = TestScheduler()
+        RxJavaPlugins.setComputationSchedulerHandler { testScheduler }
+
+        every { api.pollRates("EUR") } returns Flowable.just(
+            RatesDTO(
+                base = "EUR",
+                date = "2018-09-12",
+                rates = mapOf(
+                    "USD" to 123.4,
+                    "TWD" to 321.0
+                )
+            )
+        )
+
+        val subscriber = repo.pollRates("EUR", 1.0, TrampolineSchedulerProvider())
+            .subscribeOn(testScheduler)
+            .test()
+
+        subscriber
+            .assertNoErrors()
+            .assertNotTerminated()
+
+        // First api call will be without delay, hence after 1 second the valueCount should be 2
+        testScheduler.advanceTimeBy(1, TimeUnit.SECONDS)
+        subscriber.assertValueCount(2)
+
+        testScheduler.advanceTimeBy(1, TimeUnit.SECONDS)
+        subscriber.assertValueCount(3)
+        subscriber.dispose()
     }
 }

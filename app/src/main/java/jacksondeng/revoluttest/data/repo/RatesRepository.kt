@@ -4,23 +4,31 @@ import android.content.SharedPreferences
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.cache.dao.RatesDao
 import jacksondeng.revoluttest.model.dto.RatesDTO
 import jacksondeng.revoluttest.model.entity.CurrencyModel
 import jacksondeng.revoluttest.model.entity.Rates
 import jacksondeng.revoluttest.util.BASE_THUMBNAIL_URL
+import jacksondeng.revoluttest.util.BaseSchedulerProvider
 import jacksondeng.revoluttest.util.TAG_LAST_CACHED_TIME
 import org.joda.time.Interval
 import java.util.*
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 interface RatesRepository {
-    fun pollRates(base: String, multiplier: Double = 1.0): Flowable<Rates>
-    fun getCachedRates(base: String, multiplier: Double = 1.0): Single<Rates>
+    fun pollRates(
+        base: String,
+        multiplier: Double = 1.0,
+        scheduler: BaseSchedulerProvider
+    ): Flowable<Rates>
+
+    fun getCachedRates(
+        base: String,
+        multiplier: Double = 1.0,
+        scheduler: BaseSchedulerProvider
+    ): Single<Rates>
 }
 
 class RatesRepositoryImpl @Inject constructor(
@@ -32,10 +40,10 @@ class RatesRepositoryImpl @Inject constructor(
 
     override fun pollRates(
         base: String,
-        multiplier: Double
+        multiplier: Double,
+        scheduler: BaseSchedulerProvider
     ): Flowable<Rates> {
         // Prevent overlapping requests
-        val scheduler = Schedulers.from(Executors.newSingleThreadExecutor())
         return (
                 Flowable.fromPublisher(
                     api.pollRates(base).retry(2)
@@ -46,18 +54,21 @@ class RatesRepositoryImpl @Inject constructor(
 
                 ).repeatWhen { flow: Flowable<Any> -> flow.delay(1, TimeUnit.SECONDS) }
                     .onBackpressureLatest()
-                    .subscribeOn(scheduler)
-                    .distinctUntilChanged()
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(scheduler.singleThread())
+                    .observeOn(scheduler.ui())
                     .flatMap {
                         Flowable.just(mapToModel(it, multiplier))
                     })
     }
 
-    override fun getCachedRates(base: String, multiplier: Double): Single<Rates> {
+    override fun getCachedRates(
+        base: String,
+        multiplier: Double,
+        scheduler: BaseSchedulerProvider
+    ): Single<Rates> {
         return ratesDao.getCachedRates(base)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(scheduler.computation())
+            .observeOn(scheduler.ui())
             .map {
                 (mapToModel(it, multiplier))
             }

@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import jacksondeng.revoluttest.data.repo.RatesRepository
+import jacksondeng.revoluttest.util.BaseSchedulerProvider
+import jacksondeng.revoluttest.util.SchedulerProvider
 import jacksondeng.revoluttest.util.State
 import jacksondeng.revoluttest.util.getSelectedBase
 import javax.inject.Inject
@@ -23,12 +25,13 @@ class RatesViewModel @Inject constructor(
     private var compositeDisposable = CompositeDisposable()
 
     fun pollRates(
-        base: String = sharePref.getSelectedBase()
-        , multiplier: Double = this.multiplier
+        base: String = sharePref.getSelectedBase(),
+        multiplier: Double = this.multiplier,
+        schedulerProvider: BaseSchedulerProvider = SchedulerProvider()
     ) {
         this.multiplier = multiplier
         compositeDisposable.add(
-            repo.pollRates(base, multiplier)
+            repo.pollRates(base, multiplier, schedulerProvider)
                 .subscribe({ rates ->
                     rates?.let {
                         _state.value = State.Loaded(it.rates)
@@ -49,7 +52,7 @@ class RatesViewModel @Inject constructor(
         this.multiplier = multiplier
         if (compositeDisposable.size() == 0) {
             compositeDisposable.add(
-                repo.getCachedRates(base, multiplier)
+                repo.getCachedRates(base, multiplier, SchedulerProvider())
                     .subscribe({ rates ->
                         rates?.let {
                             if (baseChanged) {
