@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.fragment_main.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+
 class MainActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -50,6 +51,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        this.hideSoftKeyboard()
         viewModel.pausePolling()
     }
 
@@ -93,6 +95,11 @@ class MainActivity : DaggerAppCompatActivity() {
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
             // Prevent imageview flickering when submitList is called
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        }
+
+        ratesRv.setOnTouchListener { v, _ ->
+            v.hideKeyBoard()
+            false
         }
     }
 

@@ -1,12 +1,15 @@
 package jacksondeng.revoluttest.util
 
+import android.app.Activity
 import android.content.Context
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import com.airbnb.lottie.LottieAnimationView
+
 
 fun SharedPreferences.updateSelectedBase(base: String) {
     this.edit()
@@ -53,3 +56,13 @@ fun LottieAnimationView.showAndPlay() {
     this.visible()
     this.playAnimation()
 }
+
+fun Activity.hideSoftKeyboard() {
+    currentFocus?.let {
+        val inputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager?
+        inputMethodManager!!.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+    }
+}
+
+
