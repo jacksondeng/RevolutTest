@@ -1,5 +1,6 @@
 package jacksondeng.revoluttest.view.adapter
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -22,7 +23,6 @@ import jacksondeng.revoluttest.util.updateSelectedBase
 import jacksondeng.revoluttest.view.viewholder.ExchangeRateViewHolder
 import jacksondeng.revoluttest.view.viewholder.QueryRateViewHolder
 import java.text.DecimalFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val VIEW_TYPE_QUERY_RATE = 0
@@ -39,45 +39,15 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
         when (viewType) {
             VIEW_TYPE_QUERY_RATE -> {
                 val holder = createQueryRateHolder(parent)
-                RxView.focusChanges(holder.binding.queryAmount)
-                    .skipInitialValue()
-                    .subscribe(focusChangesSubject)
-
-                RxTextView
-                    .editorActions(holder.binding.queryAmount)
-                    .filter { it in arrayOf(EditorInfo.IME_ACTION_DONE, it == EditorInfo.IME_NULL) }
-                    .subscribe {
-                        holder.binding.queryAmount.clearFocus()
-                        parent.hideKeyBoard()
-                    }
-
-                RxTextView
-                    .textChanges(holder.binding.queryAmount)
-                    .debounce(300, TimeUnit.MILLISECONDS)
-                    .map {
-                        if (it.isEmpty()) {
-                            1.0
-                        } else {
-                            val rate = it.toString().toDouble()
-                            DecimalFormat(CURRENCY_PATTERN).format(rate).toString().toDouble()
-                        }
-                    }
-                    .subscribe(textChangeSubject)
-
+                subscibeToFocusChangeEvent(holder)
+                subscribeToKeyboardDoneEvent(parent, holder)
+                subscribeToTextChangesEvent(holder)
                 return holder
             }
 
             VIEW_TYPE_EXCHANGE_RATE -> {
                 val holder = createExchangeRateHolder(parent)
-                RxView.clicks(holder.binding.root)
-                    .takeUntil(RxView.detaches(parent))
-                    .map<CurrencyModel> {
-                        sharePref.clearLastCachedTime()
-                        sharePref.updateSelectedBase(differ.currentList[holder.adapterPosition].currency.currencyCode)
-                        differ.currentList[holder.adapterPosition]
-                    }
-                    .subscribe(clickSubject)
-
+                subscribeToItemClickEvent(parent, holder)
                 return holder
             }
 
@@ -132,5 +102,48 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
             layoutInflater, R.layout.item_query_rate, parent, false
         )
         return QueryRateViewHolder(binding)
+    }
+
+    private fun subscibeToFocusChangeEvent(holder: QueryRateViewHolder) {
+        RxView.focusChanges(holder.binding.queryAmount)
+            .skipInitialValue()
+            .subscribe(focusChangesSubject)
+    }
+
+    @SuppressLint("CheckResult")
+    private fun subscribeToKeyboardDoneEvent(parent: ViewGroup, holder: QueryRateViewHolder) {
+        RxTextView
+            .editorActions(holder.binding.queryAmount)
+            .filter { it in arrayOf(EditorInfo.IME_ACTION_DONE, it == EditorInfo.IME_NULL) }
+            .subscribe {
+                holder.binding.queryAmount.clearFocus()
+                parent.hideKeyBoard()
+            }
+    }
+
+    private fun subscribeToTextChangesEvent(holder: QueryRateViewHolder) {
+        RxTextView
+            .textChanges(holder.binding.queryAmount)
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .map {
+                if (it.isEmpty()) {
+                    1.0
+                } else {
+                    val rate = it.toString().toDouble()
+                    DecimalFormat(CURRENCY_PATTERN).format(rate).toString().toDouble()
+                }
+            }
+            .subscribe(textChangeSubject)
+    }
+
+    private fun subscribeToItemClickEvent(parent: ViewGroup, holder: ExchangeRateViewHolder) {
+        RxView.clicks(holder.binding.root)
+            .takeUntil(RxView.detaches(parent))
+            .map<CurrencyModel> {
+                sharePref.clearLastCachedTime()
+                sharePref.updateSelectedBase(differ.currentList[holder.adapterPosition].currency.currencyCode)
+                differ.currentList[holder.adapterPosition]
+            }
+            .subscribe(clickSubject)
     }
 }

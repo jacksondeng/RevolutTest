@@ -10,7 +10,7 @@ import jacksondeng.revoluttest.data.cache.dao.RatesDao
 import jacksondeng.revoluttest.data.cache.db.RatesDb
 import jacksondeng.revoluttest.data.repo.RatesRepository
 import jacksondeng.revoluttest.data.repo.RatesRepositoryImpl
-import jacksondeng.revoluttest.model.ActivityScope
+import jacksondeng.revoluttest.di.scope.ActivityScope
 import jacksondeng.revoluttest.util.DB_NAME
 import javax.inject.Singleton
 

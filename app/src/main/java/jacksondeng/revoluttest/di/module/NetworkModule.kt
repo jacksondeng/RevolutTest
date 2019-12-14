@@ -3,7 +3,7 @@ package jacksondeng.revoluttest.di.module
 import dagger.Module
 import dagger.Provides
 import jacksondeng.revoluttest.data.api.RatesApi
-import jacksondeng.revoluttest.model.ActivityScope
+import jacksondeng.revoluttest.di.scope.ActivityScope
 import jacksondeng.revoluttest.util.BASE_URL
 import jacksondeng.revoluttest.util.TIMEOUT
 import okhttp3.OkHttpClient

@@ -1,4 +1,4 @@
-package jacksondeng.revoluttest.model
+package jacksondeng.revoluttest.di.scope
 
 import javax.inject.Scope
 

@@ -44,6 +44,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        mainLayoutWrapper?.requestFocus()
         viewModel.pollRates()
     }
 
