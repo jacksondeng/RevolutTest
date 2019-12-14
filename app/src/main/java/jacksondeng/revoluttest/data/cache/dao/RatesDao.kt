@@ -12,7 +12,7 @@ import jacksondeng.revoluttest.util.TABLE_NAME_RATES
 @Dao
 interface RatesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun updateCache(rates: RatesDTO): Completable
+    fun updateCache(rates: RatesDTO): Long
 
     @Query("SELECT * FROM $TABLE_NAME_RATES WHERE base = :base")
     fun getCachedRates(base: String): Single<RatesDTO>

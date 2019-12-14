@@ -23,6 +23,7 @@ class RatesViewModel @Inject constructor(
     private var multiplier: Double = 1.0
 
     private var compositeDisposable = CompositeDisposable()
+    private var baseChanged = false
 
     fun pollRates(
         base: String = sharePref.getSelectedBase(),
@@ -34,7 +35,12 @@ class RatesViewModel @Inject constructor(
             repo.pollRates(base, multiplier, schedulerProvider)
                 .subscribe({ rates ->
                     rates?.let {
-                        _state.value = State.Loaded(it.rates)
+                        if (baseChanged) {
+                            _state.value = State.RefreshList(it.rates)
+                            baseChanged = false
+                        } else {
+                            _state.value = State.Loaded(it.rates)
+                        }
                     } ?: run {
                         _state.value = State.Error()
                     }
@@ -50,6 +56,8 @@ class RatesViewModel @Inject constructor(
         baseChanged: Boolean = false
     ) {
         this.multiplier = multiplier
+        this.baseChanged = baseChanged
+
         if (compositeDisposable.size() == 0) {
             compositeDisposable.add(
                 repo.getCachedRates(base, multiplier, SchedulerProvider())

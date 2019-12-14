@@ -3,7 +3,6 @@ package jacksondeng.revoluttest.data.repo
 import android.content.SharedPreferences
 import io.reactivex.Flowable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import jacksondeng.revoluttest.data.api.RatesApi
 import jacksondeng.revoluttest.data.cache.dao.RatesDao
 import jacksondeng.revoluttest.model.dto.RatesDTO
