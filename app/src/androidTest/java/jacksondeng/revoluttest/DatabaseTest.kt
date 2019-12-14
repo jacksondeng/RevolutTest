@@ -55,7 +55,7 @@ class DatabaseTest {
             )
         )
 
-        ratesDao.updateCache(dummyResponse).blockingAwait()
+        ratesDao.updateCache(dummyResponse)
 
         val observer = ratesDao.getCachedRates("EUR")
             .subscribeOn(TrampolineSchedulerProvider().io())
