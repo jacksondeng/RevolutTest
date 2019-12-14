@@ -45,7 +45,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        mainLayoutWrapper?.requestFocus()
+        window?.decorView?.clearFocus()
         viewModel.pollRates()
     }
 
@@ -93,13 +93,14 @@ class MainActivity : DaggerAppCompatActivity() {
         ratesRv.apply {
             adapter = ratesAdapter
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
+
             // Prevent imageview flickering when submitList is called
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        }
 
-        ratesRv.setOnTouchListener { v, _ ->
-            v.hideKeyBoard()
-            false
+            setOnTouchListener { v, _ ->
+                v.hideKeyBoard()
+                false
+            }
         }
     }
 
