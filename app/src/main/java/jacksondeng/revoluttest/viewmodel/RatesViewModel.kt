@@ -42,6 +42,7 @@ class RatesViewModel @Inject constructor(
                 .subscribe({ rates ->
                     rates?.let {
                         if (baseChanged) {
+                            // Queried currency changed, refresh the list and swap the position
                             _state.value = State.RefreshList(it.rates)
                             baseChanged = false
                         } else {
@@ -71,15 +72,22 @@ class RatesViewModel @Inject constructor(
                     .subscribe({ rates ->
                         rates?.let {
                             if (baseChanged) {
+                                // Queried currency changed, refresh the list and swap the position
                                 _state.value = State.RefreshList(it.rates)
+                                pausePolling()
+                                pollRates()
+
                             } else {
                                 _state.value = State.Calculated(it.rates)
+                                pausePolling()
                             }
                         } ?: run {
-                            _state.value = State.Loading()
+                            // Failed to find cached rate, polling api for new rates
+                            retry()
                         }
                     }, {
-                        _state.value = State.Loading()
+                        // Failed to find cached rate, polling api for new rates
+                        retry()
                     })
             )
         }

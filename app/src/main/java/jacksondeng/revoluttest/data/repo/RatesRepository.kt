@@ -49,6 +49,7 @@ class RatesRepositoryImpl @Inject constructor(
                         .doOnNext {
                             cacheRate(it)
                         }
+                        // Fall back to cached result
                         .onErrorResumeNext(ratesDao.getCachedRates(base).toFlowable())
 
                 ).repeatWhen { flow: Flowable<Any> -> flow.delay(1, TimeUnit.SECONDS) }

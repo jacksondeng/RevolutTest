@@ -141,6 +141,7 @@ class RatesAdapter(private val sharePref: SharedPreferences) :
                             DecimalFormat(CURRENCY_PATTERN).format(rate).toString().toDouble()
                         }
                     } catch (exception: NumberFormatException) {
+                        // Set the amount to default (1.0) if overflow happen
                         if (BuildConfig.DEBUG) {
                             Log.e("InvalidNumber", it.toString())
                         }

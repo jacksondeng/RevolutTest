@@ -82,8 +82,10 @@ class MainActivity : DaggerAppCompatActivity() {
 
         compositeDisposable.add(ratesAdapter.focusChangesSubject.subscribe { hasFocus ->
             if (hasFocus) {
+                // Pause polling when editText has focus
                 viewModel.pausePolling()
             } else {
+                // Resume polling when focus is lost
                 viewModel.pollRates()
             }
         })
@@ -113,12 +115,10 @@ class MainActivity : DaggerAppCompatActivity() {
                 }
 
                 is State.Calculated -> {
-                    viewModel.pausePolling()
                     showList(state.rates)
                 }
 
                 is State.Loading -> {
-                    viewModel.pollRates()
                     ratesRv.gone()
                     loader.showAndPlay()
                     emptyLayout.gone()
@@ -128,8 +128,6 @@ class MainActivity : DaggerAppCompatActivity() {
                     showList(state.rates)
                     ratesRv.post {
                         ratesRv.smoothScrollToPosition(0)
-                        viewModel.pausePolling()
-                        viewModel.pollRates()
                     }
                 }
 
